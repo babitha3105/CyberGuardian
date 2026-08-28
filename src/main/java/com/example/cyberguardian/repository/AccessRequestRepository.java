@@ -4,6 +4,8 @@ package com.example.cyberguardian.repository;
 import com.example.cyberguardian.entity.AccessRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AccessRequestRepository extends JpaRepository<AccessRequest, Long> {
+import java.util.List;
 
+public interface AccessRequestRepository extends JpaRepository<AccessRequest, Long> {
+    List<AccessRequest> findByChildChildId(Long childId);
 }

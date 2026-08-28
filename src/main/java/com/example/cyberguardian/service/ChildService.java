@@ -1,10 +1,10 @@
 package com.example.cyberguardian.service;
-
 import com.example.cyberguardian.entity.Child;
 import com.example.cyberguardian.entity.Parent;
 import com.example.cyberguardian.repository.ChildRepository;
 import com.example.cyberguardian.repository.ParentRepository;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 public class ChildService {
@@ -28,5 +28,8 @@ public class ChildService {
         child.setParent(parent);
 
         return childRepository.save(child);
+    }
+    public Optional<Child> getChildById(Long childId) {
+        return childRepository.findById(childId);
     }
 }
