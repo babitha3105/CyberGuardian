@@ -2,7 +2,7 @@ package com.example.cyberguardian.controller;
 import com.example.cyberguardian.entity.Alert;
 import com.example.cyberguardian.service.AlertService;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.cyberguardian.dto.AlertResponseDTO;
 import java.util.List;
 
 @RestController
@@ -17,8 +17,23 @@ public class AlertController {
         return alertservice.saveAlert(alert);
     }
     @GetMapping("/parent/{parentId}")
-    public List<Alert> getAlertsByParentId(@PathVariable Long parentId) {
-        return alertservice.getAlertsByParentId(parentId);
+    public List<AlertResponseDTO> getAlertsByParentId(
+            @PathVariable Long parentId) {
+
+        List<Alert> alerts =
+                alertservice.getAlertsByParentId(parentId);
+
+        return alerts.stream()
+                .map(alert -> new AlertResponseDTO(
+                        alert.getAlertId(),
+                        alert.getAlertType(),
+                        alert.getMessage(),
+                        alert.isRead(),
+                        alert.getCreatedAt(),
+                        alert.getChild().getChildId(),
+                        alert.getChild().getName()
+                ))
+                .toList();
     }
     @PutMapping("/{alertId}/read")
     public Alert markAlertAsRead(@PathVariable Long alertId) {

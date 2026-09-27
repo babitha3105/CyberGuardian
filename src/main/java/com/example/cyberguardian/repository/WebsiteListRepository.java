@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 public interface WebsiteListRepository extends JpaRepository<WebsiteList,Long> {
     Optional<WebsiteList> findByDomainAndListType(String domain, String listType);
-
+    boolean existsByDomainAndListType(String domain, String listType);
 }

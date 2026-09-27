@@ -90,10 +90,44 @@ CREATE TABLE alerts (
         REFERENCES children(child_id)
 );
 
-DESCRIBE alerts;
+DESCRIBE cyberguardian.alerts;
 ALTER TABLE children
 ADD COLUMN extension_status VARCHAR(20) NOT NULL DEFAULT 'DISCONNECTED',
 ADD COLUMN last_seen TIMESTAMP NULL;
 
 DESCRIBE children;
 SHOW TABLES;
+CREATE TABLE cyberguardian.website_lists (
+    list_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    domain VARCHAR(255) NOT NULL,
+    list_type VARCHAR(20) NOT NULL,
+    source VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+describe cyberguardian.website_lists;
+select * from cyberguardian.policies;
+select * from cyberguardian.website_lists;
+select * from cyberguardian.children;
+SELECT * FROM cyberguardian.alerts
+WHERE alert_type = 'TAMPER_DETECTED';
+SELECT *
+FROM cyberguardian.alerts
+WHERE child_id = 1
+AND alert_type = 'TAMPER_DETECTED'
+AND is_read = false;
+
+DELETE FROM cyberguardian.alerts
+WHERE child_id = 1
+AND alert_type = 'TAMPER_DETECTED'
+AND is_read = false;
+
+SELECT *
+FROM cyberguardian.alerts
+WHERE child_id = 1
+AND alert_type = 'TAMPER_DETECTED'
+AND is_read = false;
+SELECT * from browsing_history;
+
+SELECT request_id, child_id, url, status
+FROM access_requests
+WHERE request_id = 6;

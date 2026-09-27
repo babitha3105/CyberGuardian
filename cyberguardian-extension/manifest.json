@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "CyberGuardian",
+  "version": "1.0",
+  "description": "AI-Assisted Web Threat Detection and Parent Alert System",
+
+  "permissions": [
+    "tabs","alarms"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  }
+}

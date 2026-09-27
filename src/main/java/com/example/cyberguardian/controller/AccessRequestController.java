@@ -2,7 +2,7 @@ package com.example.cyberguardian.controller;
 import com.example.cyberguardian.entity.AccessRequest;
 import com.example.cyberguardian.service.AccessRequestService;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.cyberguardian.dto.AccessRequestResponseDTO;
 import java.util.List;
 
 @RestController
@@ -18,8 +18,23 @@ public class AccessRequestController {
         return accessrequestservice.saveAccessRequest(accessrequest);
     }
     @GetMapping("/child/{childId}")
-    public List<AccessRequest> getAccessRequestsByChildId(@PathVariable Long childId) {
-        return accessrequestservice.getAccessRequestsByChildId(childId);
+    public List<AccessRequestResponseDTO> getAccessRequestsByChildId(
+            @PathVariable Long childId) {
+
+        List<AccessRequest> requests =
+                accessrequestservice.getAccessRequestsByChildId(childId);
+
+        return requests.stream()
+                .map(request -> new AccessRequestResponseDTO(
+                        request.getRequestId(),
+                        request.getUrl(),
+                        request.getStatus(),
+                        request.getRequestedAt(),
+                        request.getRespondedAt(),
+                        request.getChild().getChildId(),
+                        request.getChild().getName()
+                ))
+                .toList();
     }
     @PutMapping("/{requestId}/respond")
     public AccessRequest respondToAccessRequest(

@@ -26,8 +26,17 @@ public class ChildService {
                 .orElseThrow(() -> new RuntimeException("Parent not found"));
 
         child.setParent(parent);
+        child.setConnectionCode(generateConnectionCode());
+        child.setExtensionStatus("NOT_CONNECTED");
 
         return childRepository.save(child);
+    }
+    private String generateConnectionCode() {
+
+        return java.util.UUID.randomUUID()
+                .toString()
+                .substring(0, 6)
+                .toUpperCase();
     }
     public Optional<Child> getChildById(Long childId) {
         return childRepository.findById(childId);

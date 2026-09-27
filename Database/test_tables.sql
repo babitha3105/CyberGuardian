@@ -36,7 +36,7 @@ VALUES
 VALUES
     (1, 1, 'RISK_DETECTED', 'Test risky website alert');
     SELECT * FROM alerts;
-    
+    DESCRIBE cyberguardian.alerts;
     SELECT
     p.parent_id,
     p.name AS parent_name,

@@ -21,6 +21,13 @@ public class AlertService {
     public List<Alert> getAlertsByParentId(Long parentId) {
         return alertRepository.findByParentParentId(parentId);
     }
+    public boolean alertExists(Long childId, String alertType) {
+        return alertRepository
+                .existsByChildChildIdAndAlertType(
+                        childId,
+                        alertType
+                );
+    }
     public Alert markAlertAsRead(Long alertId) {
 
         Alert alert = alertRepository.findById(alertId)
@@ -29,5 +36,12 @@ public class AlertService {
         alert.setRead(true);
 
         return alertRepository.save(alert);
+    }
+    public boolean unreadAlertExists(Long childId, String alertType) {
+        return alertRepository
+                .existsByChildChildIdAndAlertTypeAndIsReadFalse(
+                        childId,
+                        alertType
+                );
     }
 }

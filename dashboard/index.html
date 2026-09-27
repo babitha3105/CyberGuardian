@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CyberGuardian - Parent Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 24px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            color: #d1d5db;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 30px 40px;
+        }
+
+        h2 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .child-info {
+            background-color: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .child-info p {
+            margin: 10px 0;
+        }
+
+        /* Overview Cards */
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-left: 5px solid #1f2937;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #4b5563;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+            color: #111827;
+        }
+
+        /* Activity sections */
+
+        #browsingActivity div,
+        #recentSearches div,
+        #accessRequests div {
+            padding: 12px !important;
+            border-bottom: 1px solid #e5e7eb !important;
+        }
+
+        #browsingActivity div:last-child,
+        #recentSearches div:last-child,
+        #accessRequests div:last-child {
+            border-bottom: none !important;
+        }
+
+        /* Buttons */
+
+        button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #1f2937;
+            color: white;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background-color: #374151;
+        }
+
+        /* Weekly report */
+
+        #weeklySafety {
+            font-weight: bold;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 800px) {
+
+            .container {
+                padding: 20px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+        .weekly-report {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .report-item {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-item span {
+            color: #4b5563;
+        }
+
+        .report-item strong {
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .report-item.safety {
+            grid-column: span 2;
+        }
+        #accessRequests > div {
+            background-color: #f9fafb;
+            padding: 18px !important;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 10px;
+        }
+
+        #accessRequests > div:last-child {
+            margin-bottom: 0;
+        }
+
+        #accessRequests button {
+            margin-top: 12px;
+            padding: 8px 16px;
+            border-radius: 6px;
+        }
+        #accessRequests button:first-of-type {
+            background-color: #16a34a;
+        }
+
+        #accessRequests button:first-of-type:hover {
+            background-color: #15803d;
+        }
+
+        #accessRequests button:last-of-type {
+            background-color: #dc2626;
+        }
+
+        #accessRequests button:last-of-type:hover {
+            background-color: #b91c1c;
+        }
+        /* Alert cards */
+
+        #recentAlerts > div {
+            background-color: #f9fafb;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+        }
+
+        #recentAlerts > div:last-child {
+            margin-bottom: 0;
+        }
+
+        #recentAlerts p {
+            margin: 5px 0;
+        }
+
+        #recentAlerts p:first-child {
+            font-weight: bold;
+        }
+
+        #recentAlerts hr {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>CyberGuardian</h1>
+    <p>Parent Dashboard</p>
+</header>
+
+<div class="container">
+
+    <div class="child-info">
+        <h2>Child Information</h2>
+
+        <p>
+            <strong>Child:</strong>
+            <span id="childName">Loading...</span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span id="childStatus">Checking...</span>
+        </p>
+    </div>
+
+    <h2>Overview</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Websites</h3>
+            <p class="number" id="websiteCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Searches</h3>
+            <p class="number" id="searchCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Alerts</h3>
+            <p class="number" id="alertCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Blocked</h3>
+            <p class="number" id="blockedCount">0</p>
+        </div>
+
+    </div>
+    <h2>Recent Browsing Activity</h2>
+
+    <div class="child-info">
+
+        <div id="browsingActivity">
+            Loading...
+        </div>
+    </div>
+    <h2>Recent Searches</h2>
+
+    <div class="child-info">
+
+        <div id="recentSearches">
+            Loading...
+        </div>
+
+    </div>
+    <h2>AI Search Analysis</h2>
+
+    <div class="child-info">
+
+        <p>
+            <strong>Category:</strong>
+            <span id="geminiCategory">Loading...</span>
+        </p>
+
+        <p>
+            <strong>Intent:</strong>
+            <span id="geminiIntent">Loading...</span>
+        </p>
+
+        <p>
+            <strong>Pattern:</strong>
+            <span id="geminiPattern">Loading...</span>
+        </p>
+
+        <p>
+            <strong>Risk Level:</strong>
+            <span id="geminiRisk">Loading...</span>
+        </p>
+
+        <p>
+            <strong>Explanation:</strong>
+            <span id="geminiExplanation">Loading...</span>
+        </p>
+
+    </div>
+    <h2>Access Requests</h2>
+
+    <div class="child-info">
+
+        <div id="accessRequests">
+            Loading...
+        </div>
+        <h2>Recent Alerts</h2>
+
+        <div class="child-info">
+            <div id="recentAlerts">Loading...</div>
+        </div>
+    </div>
+    <h2>Weekly Report</h2>
+
+    <div class="weekly-report">
+
+        <div class="report-item">
+            <span>Total Websites</span>
+            <strong id="weeklyWebsites">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Total Searches</span>
+            <strong id="weeklySearches">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Blocked Websites</span>
+            <strong id="weeklyBlocked">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Total Alerts</span>
+            <strong id="weeklyAlerts">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>High-Risk Searches</span>
+            <strong id="weeklyHighRisk">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Education Searches</span>
+            <strong id="weeklyEducation">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Entertainment Searches</span>
+            <strong id="weeklyEntertainment">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Gaming Searches</span>
+            <strong id="weeklyGaming">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Sports Searches</span>
+            <strong id="weeklySports">0</strong>
+        </div>
+
+        <div class="report-item">
+            <span>Other Searches</span>
+            <strong id="weeklyOther">0</strong>
+        </div>
+
+        <div class="report-item safety">
+            <span>Safety Status</span>
+            <strong id="weeklySafety">Loading...</strong>
+        </div>
+
+    </div>
+</div>
+<script>
+
+    const connectionCode = "B668C3";
+
+    fetch(
+        `http://localhost:8080/api/child-connection?connectionCode=${connectionCode}`
+    )
+        .then(async response => {
+
+            console.log("CHILD CONNECTION STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("CHILD CONNECTION RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Child connection failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(child => {
+
+            console.log("Child data received:", child);
+
+            document.getElementById("childName").textContent =
+                child.name;
+
+            document.getElementById("childStatus").textContent =
+                "🟢 Connected";
+        })
+        .catch(error => {
+
+            console.error("Child connection failed:", error);
+
+            document.getElementById("childName").textContent =
+                "Unable to load";
+
+            document.getElementById("childStatus").textContent =
+                "🔴 Disconnected";
+        });
+    fetch("http://localhost:8080/api/browsing-history/child/3")
+        .then(async response => {
+            console.log("BROWSING HISTORY STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("BROWSING HISTORY RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Browsing history request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(history => {
+            console.log("Browsing history received:", history);
+
+            document.getElementById("websiteCount").textContent =
+                history.length;
+        })
+        .catch(error => {
+            console.error("Browsing history failed:", error);
+
+            document.getElementById("websiteCount").textContent =
+                "0";
+        });
+    fetch("http://localhost:8080/api/search-history/child/3")
+        .then(async response => {
+            console.log("SEARCH HISTORY STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("SEARCH HISTORY RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Search history request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(searches => {
+            console.log("Search history received:", searches);
+
+            document.getElementById("searchCount").textContent =
+                searches.length;
+        })
+        .catch(error => {
+            console.error("Search history failed:", error);
+
+            document.getElementById("searchCount").textContent =
+                "0";
+        });
+    fetch("http://localhost:8080/api/alerts/parent/1")
+        .then(async response => {
+
+            console.log("ALERTS STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("ALERTS RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Alerts request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(alerts => {
+
+            console.log("Alerts received:", alerts);
+
+            document.getElementById("alertCount").textContent =
+                alerts.length;
+        })
+        .catch(error => {
+
+            console.error("Alerts failed:", error);
+
+            document.getElementById("alertCount").textContent =
+                "0";
+        });
+    fetch("http://localhost:8080/api/browsing-history/child/3")
+        .then(async response => {
+
+            console.log("BLOCKED HISTORY STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("BLOCKED HISTORY RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Browsing history request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(history => {
+
+            const blockedCount = history.filter(
+                item => item.actionTaken === "BLOCK"
+            ).length;
+
+            console.log("Blocked websites:", blockedCount);
+
+            document.getElementById("blockedCount").textContent =
+                blockedCount;
+        })
+        .catch(error => {
+
+            console.error("Blocked count failed:", error);
+
+            document.getElementById("blockedCount").textContent =
+                "0";
+        });
+    function getReadableUrl(url) {
+
+        try {
+
+            const parsedUrl = new URL(url);
+
+            if (
+                parsedUrl.hostname.includes("google.com") &&
+                parsedUrl.pathname === "/search"
+            ) {
+
+                const query =
+                    parsedUrl.searchParams.get("q");
+
+                return "Google Search: " + (query || "Unknown");
+            }
+
+            let hostname = parsedUrl.hostname;
+
+            if (hostname.startsWith("www.")) {
+                hostname = hostname.substring(4);
+            }
+
+            return hostname;
+
+        } catch (error) {
+
+            return url;
+        }
+    }
+    fetch("http://localhost:8080/api/browsing-history/child/3")
+        .then(async response => {
+
+            console.log("RECENT BROWSING STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("RECENT BROWSING RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Browsing history request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(history => {
+
+            console.log("Recent browsing history:", history);
+
+            const container =
+                document.getElementById("browsingActivity");
+
+            container.innerHTML = "";
+
+            const recentHistory =
+                history.slice(-10).reverse();
+
+            recentHistory.forEach(item => {
+
+                const entry = document.createElement("div");
+
+                entry.style.padding = "10px";
+                entry.style.borderBottom = "1px solid #ddd";
+
+                entry.innerHTML = `
+    <strong>${getReadableUrl(item.url)}</strong><br>
+    Category: ${item.category}<br>
+                Risk: ${item.riskLevel}<br>
+                Action: ${item.actionTaken}
+            `;
+
+                container.appendChild(entry);
+            });
+        })
+        .catch(error => {
+
+            console.error("Recent browsing failed:", error);
+
+            document.getElementById("browsingActivity").textContent =
+                "Unable to load browsing activity.";
+        });
+    fetch("http://localhost:8080/api/search-history/child/3")
+        .then(async response => {
+
+            console.log("RECENT SEARCHES STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("RECENT SEARCHES RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Search history request failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(searches => {
+
+            console.log("Recent searches:", searches);
+
+            const container =
+                document.getElementById("recentSearches");
+
+            container.innerHTML = "";
+
+            const recentSearches =
+                searches.slice(-10).reverse();
+
+            recentSearches.forEach(item => {
+
+                const entry = document.createElement("div");
+
+                entry.style.padding = "10px";
+                entry.style.borderBottom = "1px solid #ddd";
+
+                entry.innerHTML = `
+                <strong>${item.searchQuery}</strong><br>
+                Category: ${item.category}<br>
+                Risk: ${item.riskLevel}
+            `;
+
+                container.appendChild(entry);
+            });
+        })
+        .catch(error => {
+
+            console.error("Recent searches failed:", error);
+
+            document.getElementById("recentSearches").textContent =
+                "Unable to load recent searches.";
+        });
+    fetch("http://localhost:8080/api/access-requests/child/3")
+        .then(async response => {
+
+            console.log("ACCESS REQUESTS STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("ACCESS REQUESTS RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Access requests failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(requests => {
+
+            console.log("Access requests received:", requests);
+
+            const container =
+                document.getElementById("accessRequests");
+
+            container.innerHTML = "";
+
+            requests.forEach(request => {
+
+                const entry = document.createElement("div");
+
+                entry.style.padding = "10px";
+                entry.style.borderBottom = "1px solid #ddd";
+
+                entry.innerHTML = `
+                <strong>${request.url}</strong><br>
+                Status: ${request.status}<br>
+                Requested At: ${request.requestedAt}
+            `;
+
+                if (request.status === "PENDING") {
+
+                    const approveButton =
+                        document.createElement("button");
+
+                    approveButton.textContent = "Approve";
+                    approveButton.style.marginRight = "10px";
+
+                    approveButton.addEventListener("click", () => {
+
+                        respondToRequest(
+                            request.requestId,
+                            "APPROVED"
+                        );
+
+                    });
+
+                    const denyButton =
+                        document.createElement("button");
+
+                    denyButton.textContent = "Deny";
+
+                    denyButton.addEventListener("click", () => {
+
+                        respondToRequest(
+                            request.requestId,
+                            "DENIED"
+                        );
+
+                    });
+
+                    entry.appendChild(document.createElement("br"));
+                    entry.appendChild(approveButton);
+                    entry.appendChild(denyButton);
+                }
+
+                container.appendChild(entry);
+            });
+        })
+        .catch(error => {
+
+            console.error("Access requests failed:", error);
+
+            document.getElementById("accessRequests").textContent =
+                "Unable to load access requests.";
+        });
+
+
+    function respondToRequest(requestId, status) {
+
+        fetch(
+            `http://localhost:8080/api/access-requests/${requestId}/respond?status=${status}`,
+            {
+                method: "PUT"
+            }
+        )
+            .then(async response => {
+
+                console.log(
+                    "RESPOND REQUEST STATUS:",
+                    response.status
+                );
+
+                const text = await response.text();
+
+                console.log(
+                    "RESPOND REQUEST RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to respond to access request"
+                    );
+                }
+
+                return JSON.parse(text);
+            })
+            .then(result => {
+
+                console.log(
+                    "Access request updated:",
+                    result
+                );
+
+                location.reload();
+            })
+            .catch(error => {
+
+                console.error(
+                    "Access request response failed:",
+                    error
+                );
+
+                alert("Failed to update access request.");
+            });
+    }
+    fetch("http://localhost:8080/api/weekly-report/child/3")
+        .then(async response => {
+
+            console.log("WEEKLY REPORT STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("WEEKLY REPORT RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Weekly report failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(report => {
+
+            console.log("Weekly report received:", report);
+
+            document.getElementById("weeklyWebsites").textContent =
+                report.totalWebsites;
+
+            document.getElementById("weeklySearches").textContent =
+                report.totalSearches;
+
+            document.getElementById("weeklyBlocked").textContent =
+                report.blockedWebsites;
+
+            document.getElementById("weeklyAlerts").textContent =
+                report.totalAlerts;
+
+            document.getElementById("weeklyHighRisk").textContent =
+                report.highRiskSearches;
+
+            document.getElementById("weeklyEducation").textContent =
+                report.educationSearches;
+
+            document.getElementById("weeklyEntertainment").textContent =
+                report.entertainmentSearches;
+
+            document.getElementById("weeklyGaming").textContent =
+                report.gamingSearches;
+
+            document.getElementById("weeklySports").textContent =
+                report.sportsSearches;
+
+            document.getElementById("weeklyOther").textContent =
+                report.otherSearches;
+
+            document.getElementById("weeklySafety").textContent =
+                report.safetyStatus;
+        })
+        .catch(error => {
+
+            console.error("Weekly report failed:", error);
+
+            document.getElementById("weeklySafety").textContent =
+                "Unable to load report.";
+        });
+    fetch("http://localhost:8080/api/alerts/parent/1")
+        .then(response => response.json())
+        .then(alerts => {
+
+            const container = document.getElementById("recentAlerts");
+
+            if (alerts.length === 0) {
+                container.innerHTML = "<p>No alerts.</p>";
+                return;
+            }
+
+            container.innerHTML = "";
+
+            alerts.slice().reverse().slice(0, 5).forEach(alert => {
+
+                const alertDiv = document.createElement("div");
+
+                let alertTitle = alert.alertType;
+
+                if (alert.alertType === "HIGH_RISK_SEARCH") {
+                    alertTitle = "⚠️ High-Risk Search";
+                }
+                else if (alert.alertType === "HIGH_RISK_WEBSITE") {
+                    alertTitle = "⚠️ High-Risk Website";
+                }
+                else if (alert.alertType === "TAMPER_DETECTED") {
+                    alertTitle = "🛡️ Extension Tampering Detected";
+                }
+                else if (alert.alertType === "ACCESS_REQUEST") {
+                    alertTitle = "🔔 Access Request";
+                }
+                else if (alert.alertType === "PHISHING_PATTERN") {
+                    alertTitle = "⚠️ Suspicious Search Pattern";
+                }
+                else if (alert.alertType === "RISK_DETECTED" || alert.alertType === "RISK") {
+                    alertTitle = "⚠️ Security Risk Detected";
+                }
+
+                alertDiv.innerHTML = `
+    <p><strong>${alertTitle}</strong></p>
+    <p>${alert.message}</p>
+
+    ${
+                    alert.read
+                        ? `<p><strong>Read</strong></p>`
+                        : `<button onclick="markAlertAsRead(${alert.alertId})">
+                Mark as Read
+           </button>`
+                }
+`;
+                container.appendChild(alertDiv);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading alerts:", error);
+
+            document.getElementById("recentAlerts").innerHTML =
+                "<p>Failed to load alerts.</p>";
+        });
+    function markAlertAsRead(alertId) {
+
+        fetch(`http://localhost:8080/api/alerts/${alertId}/read`, {
+            method: "PUT"
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to mark alert as read");
+                }
+
+                return response.json();
+            })
+            .then(() => {
+                console.log("Alert marked as read:", alertId);
+
+                // Reload the dashboard alerts
+                location.reload();
+            })
+            .catch(error => {
+                console.error("Error marking alert as read:", error);
+            });
+    }
+    fetch("http://localhost:8080/api/search-history/analyze/3")
+        .then(async response => {
+
+            console.log("GEMINI ANALYSIS STATUS:", response.status);
+
+            const text = await response.text();
+
+            console.log("GEMINI ANALYSIS RESPONSE:", text);
+
+            if (!response.ok) {
+                throw new Error(
+                    "Gemini analysis failed with status " + response.status
+                );
+            }
+
+            return JSON.parse(text);
+        })
+        .then(analysis => {
+
+            console.log("Gemini analysis received:", analysis);
+
+            document.getElementById("geminiCategory").textContent =
+                analysis.category;
+
+            document.getElementById("geminiIntent").textContent =
+                analysis.intent;
+
+            document.getElementById("geminiPattern").textContent =
+                analysis.pattern;
+
+            document.getElementById("geminiRisk").textContent =
+                analysis.riskLevel;
+
+            document.getElementById("geminiExplanation").textContent =
+                analysis.explanation;
+        })
+        .catch(error => {
+
+            console.error("Gemini analysis failed:", error);
+
+            document.getElementById("geminiCategory").textContent =
+                "Unable to analyze";
+
+            document.getElementById("geminiIntent").textContent =
+                "Unable to analyze";
+
+            document.getElementById("geminiPattern").textContent =
+                "Unable to analyze";
+
+            document.getElementById("geminiRisk").textContent =
+                "Unable to analyze";
+
+            document.getElementById("geminiExplanation").textContent =
+                "Gemini analysis could not be loaded.";
+        });
+</script>
+</body>
+</html>

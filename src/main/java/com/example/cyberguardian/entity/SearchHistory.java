@@ -1,10 +1,12 @@
 package com.example.cyberguardian.entity;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
 @Entity
-@Table(name="search_history")
+@Table(name = "search_history")
 public class SearchHistory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "search_id")
@@ -17,8 +19,15 @@ public class SearchHistory {
     @Column(name = "search_query", nullable = false)
     private String searchQuery;
 
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "risk_level")
+    private String riskLevel;
+
     @Column(name = "searched_at", insertable = false, updatable = false)
     private LocalDateTime searchedAt;
+
 
     public Long getSearchId() {
         return searchId;
@@ -44,6 +53,22 @@ public class SearchHistory {
         this.searchQuery = searchQuery;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(String riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
     public LocalDateTime getSearchedAt() {
         return searchedAt;
     }
@@ -52,3 +77,4 @@ public class SearchHistory {
         this.searchedAt = searchedAt;
     }
 }
+
