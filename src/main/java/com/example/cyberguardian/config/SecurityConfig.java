@@ -43,6 +43,8 @@ public class SecurityConfig {
                                 "/api/search-history/**",
                                 "/api/access-requests/**",
                                 "/api/alerts/**",
+                                "/api/policies/**",
+                                "/api/children/**",
                                 "/api/weekly-report/**"
                         ).permitAll()
                         .anyRequest().authenticated()

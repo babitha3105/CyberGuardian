@@ -150,7 +150,7 @@ public class GeminiSearchAnalysisService {
 
             GenerateContentResponse response =
                     client.models.generateContent(
-                            "gemini-3.8-flash",
+                            "gemini-3.7-flash",
                             prompt.toString(),
                             config
                     );

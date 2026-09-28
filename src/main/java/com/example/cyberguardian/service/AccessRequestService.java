@@ -8,6 +8,7 @@ import com.example.cyberguardian.entity.Child;
 import com.example.cyberguardian.repository.ChildRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AccessRequestService {
@@ -33,13 +34,26 @@ public class AccessRequestService {
 
         accessRequest.setChild(child);
 
+        Optional<AccessRequest> existingRequest =
+                accessRequestRepository
+                        .findByChildChildIdAndUrlAndStatus(
+                                child.getChildId(),
+                                accessRequest.getUrl(),
+                                "PENDING"
+                        );
+
+        if (existingRequest.isPresent()) {
+            return existingRequest.get();
+        }
+
         AccessRequest savedRequest =
                 accessRequestRepository.save(accessRequest);
 
         Alert alert = new Alert();
 
         alert.setChild(child);
-        alert.setParent(child.getParent());        alert.setAlertType("ACCESS_REQUEST");
+        alert.setParent(child.getParent());
+        alert.setAlertType("ACCESS_REQUEST");
         alert.setMessage(
                 "Access request received for: " + accessRequest.getUrl()
         );
@@ -49,7 +63,6 @@ public class AccessRequestService {
 
         return savedRequest;
     }
-
     public List<AccessRequest> getAccessRequestsByChildId(Long childId) {
         return accessRequestRepository.findByChildChildId(childId);
     }

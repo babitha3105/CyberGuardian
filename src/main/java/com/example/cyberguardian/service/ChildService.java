@@ -5,7 +5,7 @@ import com.example.cyberguardian.repository.ChildRepository;
 import com.example.cyberguardian.repository.ParentRepository;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
-
+import java.util.List;
 @Service
 public class ChildService {
 
@@ -40,5 +40,9 @@ public class ChildService {
     }
     public Optional<Child> getChildById(Long childId) {
         return childRepository.findById(childId);
+    }
+    public List<Child> getChildrenByParentId(Long parentId) {
+
+        return childRepository.findByParentParentId(parentId);
     }
 }

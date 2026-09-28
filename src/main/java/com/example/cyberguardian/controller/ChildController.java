@@ -4,7 +4,7 @@ import com.example.cyberguardian.service.ChildService;
 import  org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
-
+import java.util.List;
 @RestController
 @RequestMapping("/api/children")
 public class ChildController {
@@ -20,5 +20,11 @@ public class ChildController {
     @GetMapping("/{childId}")
     public Optional<Child> getChildById(@PathVariable Long childId) {
         return childservice.getChildById(childId);
+    }
+    @GetMapping("/parent/{parentId}")
+    public List<Child> getChildrenByParentId(
+            @PathVariable Long parentId) {
+
+        return childservice.getChildrenByParentId(parentId);
     }
 }

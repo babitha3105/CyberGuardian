@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <link rel="manifest" href="manifest.json">
     <title>CyberGuardian - Parent Dashboard</title>
 
     <style>
@@ -257,7 +257,25 @@
 <div class="container">
 
     <div class="child-info">
+
         <h2>Child Information</h2>
+
+        <p>
+            <strong>Select Child:</strong>
+
+            <select
+                    id="childSelector"
+                    onchange="changeSelectedChild()"
+                    style="
+                padding: 8px;
+                margin-left: 10px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+            "
+            >
+                <option value="">Loading children...</option>
+            </select>
+        </p>
 
         <p>
             <strong>Child:</strong>
@@ -268,6 +286,7 @@
             <strong>Status:</strong>
             <span id="childStatus">Checking...</span>
         </p>
+
     </div>
 
     <h2>Overview</h2>
@@ -294,6 +313,17 @@
             <p class="number" id="blockedCount">0</p>
         </div>
 
+    </div>
+    <h2>Policy Management</h2>
+
+    <div class="child-info">
+        <p>
+            Manage the websites your child can access.
+        </p>
+
+        <button onclick="window.location.href='policies.html'">
+            Manage Policies →
+        </button>
     </div>
     <h2>Recent Browsing Activity</h2>
 
@@ -417,8 +447,10 @@
     </div>
 </div>
 <script>
+    const parentId = 1;
 
-    const connectionCode = "B668C3";
+    let selectedChildId =
+        localStorage.getItem("selectedChildId") || "";    const connectionCode = "B668C3";
 
     fetch(
         `http://localhost:8080/api/child-connection?connectionCode=${connectionCode}`
@@ -459,7 +491,7 @@
             document.getElementById("childStatus").textContent =
                 "🔴 Disconnected";
         });
-    fetch("http://localhost:8080/api/browsing-history/child/3")
+    fetch("http://localhost:8080/api/browsing-history/child/${selectedChildId}")
         .then(async response => {
             console.log("BROWSING HISTORY STATUS:", response.status);
 
@@ -487,7 +519,7 @@
             document.getElementById("websiteCount").textContent =
                 "0";
         });
-    fetch("http://localhost:8080/api/search-history/child/3")
+    fetch("http://localhost:8080/api/search-history/child/${selectedChildId}")
         .then(async response => {
             console.log("SEARCH HISTORY STATUS:", response.status);
 
@@ -546,7 +578,7 @@
             document.getElementById("alertCount").textContent =
                 "0";
         });
-    fetch("http://localhost:8080/api/browsing-history/child/3")
+    fetch("http://localhost:8080/api/browsing-history/child/${selectedChildId}")
         .then(async response => {
 
             console.log("BLOCKED HISTORY STATUS:", response.status);
@@ -1049,6 +1081,176 @@
             document.getElementById("geminiExplanation").textContent =
                 "Gemini analysis could not be loaded.";
         });
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener("load", () => {
+
+            navigator.serviceWorker
+                .register("service-worker.js")
+                .then(registration => {
+
+                    console.log(
+                        "Service Worker registered:",
+                        registration.scope
+                    );
+
+                })
+                .catch(error => {
+
+                    console.error(
+                        "Service Worker registration failed:",
+                        error
+                    );
+
+                });
+
+        });
+
+    }
+    function loadChildren() {
+
+        fetch(
+            `http://localhost:8080/api/children/parent/${parentId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "CHILDREN STATUS:",
+                    response.status
+                );
+
+                const text = await response.text();
+
+                console.log(
+                    "CHILDREN RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Failed to load children"
+                    );
+                }
+
+                return JSON.parse(text);
+            })
+            .then(children => {
+
+                console.log(
+                    "Children received:",
+                    children
+                );
+
+                const selector =
+                    document.getElementById("childSelector");
+
+                selector.innerHTML = "";
+
+                if (children.length === 0) {
+
+                    selector.innerHTML =
+                        "<option>No children found</option>";
+
+                    return;
+                }
+
+                // If no child is selected yet,
+                // select the first child.
+                if (
+                    !selectedChildId ||
+                    !children.some(
+                        child =>
+                            String(child.childId) ===
+                            String(selectedChildId)
+                    )
+                ) {
+
+                    selectedChildId =
+                        String(children[0].childId);
+
+                    localStorage.setItem(
+                        "selectedChildId",
+                        selectedChildId
+                    );
+                }
+
+                children.forEach(child => {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value = child.childId;
+
+                    option.textContent =
+                        child.name;
+
+                    if (
+                        String(child.childId) ===
+                        String(selectedChildId)
+                    ) {
+                        option.selected = true;
+                    }
+
+                    selector.appendChild(option);
+                });
+
+                // Display selected child information
+                const selectedChild =
+                    children.find(
+                        child =>
+                            String(child.childId) ===
+                            String(selectedChildId)
+                    );
+
+                if (selectedChild) {
+
+                    document.getElementById("childName")
+                        .textContent =
+                        selectedChild.name;
+
+                    document.getElementById("childStatus")
+                        .textContent =
+                        selectedChild.extensionStatus === "CONNECTED"
+                            ? "🟢 Connected"
+                            : "🔴 Disconnected";
+                }
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Loading children failed:",
+                    error
+                );
+
+                document.getElementById("childSelector")
+                    .innerHTML =
+                    "<option>Unable to load children</option>";
+
+                document.getElementById("childName")
+                    .textContent =
+                    "Unable to load";
+
+                document.getElementById("childStatus")
+                    .textContent =
+                    "Unknown";
+            });
+    }
+    function changeSelectedChild() {
+
+        const selector =
+            document.getElementById("childSelector");
+
+        selectedChildId =
+            selector.value;
+
+        localStorage.setItem(
+            "selectedChildId",
+            selectedChildId
+        );
+
+        location.reload();
+    }
 </script>
 </body>
 </html>
