@@ -87,6 +87,11 @@
             <artifactId>google-genai</artifactId>
             <version>1.72.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.10.0</version>
+        </dependency>
     </dependencies>
 
     <build>

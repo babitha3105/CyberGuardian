@@ -1,9 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    ```
     <link rel="manifest" href="manifest.json">
+
     <title>CyberGuardian - Parent Dashboard</title>
 
     <style>
@@ -126,33 +130,6 @@
             font-weight: bold;
         }
 
-        /* Mobile */
-
-        @media (max-width: 800px) {
-
-            .container {
-                padding: 20px;
-            }
-
-            header {
-                padding: 20px;
-            }
-
-            .cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 500px) {
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 15px;
-            }
-        }
         .weekly-report {
             background-color: white;
             padding: 20px;
@@ -187,6 +164,9 @@
         .report-item.safety {
             grid-column: span 2;
         }
+
+        /* Access request cards */
+
         #accessRequests > div {
             background-color: #f9fafb;
             padding: 18px !important;
@@ -204,6 +184,7 @@
             padding: 8px 16px;
             border-radius: 6px;
         }
+
         #accessRequests button:first-of-type {
             background-color: #16a34a;
         }
@@ -219,6 +200,7 @@
         #accessRequests button:last-of-type:hover {
             background-color: #b91c1c;
         }
+
         /* Alert cards */
 
         #recentAlerts > div {
@@ -241,10 +223,44 @@
             font-weight: bold;
         }
 
-        #recentAlerts hr {
-            display: none;
+        /* Mobile */
+
+        @media (max-width: 800px) {
+
+            .container {
+                padding: 20px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .weekly-report {
+                grid-template-columns: 1fr;
+            }
+
+            .report-item.safety {
+                grid-column: span 1;
+            }
         }
     </style>
+    ```
+
 </head>
 
 <body>
@@ -255,6 +271,10 @@
 </header>
 
 <div class="container">
+    <button id="enableNotifications">
+        🔔 Enable Notifications
+    </button>
+    <!-- Child Information -->
 
     <div class="child-info">
 
@@ -267,11 +287,11 @@
                     id="childSelector"
                     onchange="changeSelectedChild()"
                     style="
-                padding: 8px;
-                margin-left: 10px;
-                border: 1px solid #d1d5db;
-                border-radius: 6px;
-            "
+                    padding: 8px;
+                    margin-left: 10px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                "
             >
                 <option value="">Loading children...</option>
             </select>
@@ -289,8 +309,9 @@
 
     </div>
 
-    <h2>Overview</h2>
+    <!-- Overview -->
 
+    <h2>Overview — All-Time</h2>
     <div class="cards">
 
         <div class="card">
@@ -314,9 +335,13 @@
         </div>
 
     </div>
+
+    <!-- Policy Management -->
+
     <h2>Policy Management</h2>
 
     <div class="child-info">
+
         <p>
             Manage the websites your child can access.
         </p>
@@ -324,7 +349,11 @@
         <button onclick="window.location.href='policies.html'">
             Manage Policies →
         </button>
+
     </div>
+
+    <!-- Recent Browsing Activity -->
+
     <h2>Recent Browsing Activity</h2>
 
     <div class="child-info">
@@ -332,7 +361,11 @@
         <div id="browsingActivity">
             Loading...
         </div>
+
     </div>
+
+    <!-- Recent Searches -->
+
     <h2>Recent Searches</h2>
 
     <div class="child-info">
@@ -342,6 +375,9 @@
         </div>
 
     </div>
+
+    <!-- AI Search Analysis -->
+
     <h2>AI Search Analysis</h2>
 
     <div class="child-info">
@@ -372,6 +408,9 @@
         </p>
 
     </div>
+
+    <!-- Access Requests -->
+
     <h2>Access Requests</h2>
 
     <div class="child-info">
@@ -379,14 +418,24 @@
         <div id="accessRequests">
             Loading...
         </div>
-        <h2>Recent Alerts</h2>
 
-        <div class="child-info">
-            <div id="recentAlerts">Loading...</div>
-        </div>
     </div>
-    <h2>Weekly Report</h2>
 
+    <!-- Recent Alerts -->
+
+    <h2>Recent Alerts</h2>
+
+    <div class="child-info">
+
+        <div id="recentAlerts">
+            Loading...
+        </div>
+
+    </div>
+
+    <!-- Weekly Report -->
+
+    <h2>Weekly Report — Last 7 Days</h2>
     <div class="weekly-report">
 
         <div class="report-item">
@@ -445,668 +494,200 @@
         </div>
 
     </div>
+
+
 </div>
-<script>
-    const parentId = 1;
+<script type="module">
 
-    let selectedChildId =
-        localStorage.getItem("selectedChildId") || "";    const connectionCode = "B668C3";
+    import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
-    fetch(
-        `http://localhost:8080/api/child-connection?connectionCode=${connectionCode}`
-    )
-        .then(async response => {
-
-            console.log("CHILD CONNECTION STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("CHILD CONNECTION RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Child connection failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(child => {
-
-            console.log("Child data received:", child);
-
-            document.getElementById("childName").textContent =
-                child.name;
-
-            document.getElementById("childStatus").textContent =
-                "🟢 Connected";
-        })
-        .catch(error => {
-
-            console.error("Child connection failed:", error);
-
-            document.getElementById("childName").textContent =
-                "Unable to load";
-
-            document.getElementById("childStatus").textContent =
-                "🔴 Disconnected";
-        });
-    fetch("http://localhost:8080/api/browsing-history/child/${selectedChildId}")
-        .then(async response => {
-            console.log("BROWSING HISTORY STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("BROWSING HISTORY RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Browsing history request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(history => {
-            console.log("Browsing history received:", history);
-
-            document.getElementById("websiteCount").textContent =
-                history.length;
-        })
-        .catch(error => {
-            console.error("Browsing history failed:", error);
-
-            document.getElementById("websiteCount").textContent =
-                "0";
-        });
-    fetch("http://localhost:8080/api/search-history/child/${selectedChildId}")
-        .then(async response => {
-            console.log("SEARCH HISTORY STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("SEARCH HISTORY RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Search history request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(searches => {
-            console.log("Search history received:", searches);
-
-            document.getElementById("searchCount").textContent =
-                searches.length;
-        })
-        .catch(error => {
-            console.error("Search history failed:", error);
-
-            document.getElementById("searchCount").textContent =
-                "0";
-        });
-    fetch("http://localhost:8080/api/alerts/parent/1")
-        .then(async response => {
-
-            console.log("ALERTS STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("ALERTS RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Alerts request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(alerts => {
-
-            console.log("Alerts received:", alerts);
-
-            document.getElementById("alertCount").textContent =
-                alerts.length;
-        })
-        .catch(error => {
-
-            console.error("Alerts failed:", error);
-
-            document.getElementById("alertCount").textContent =
-                "0";
-        });
-    fetch("http://localhost:8080/api/browsing-history/child/${selectedChildId}")
-        .then(async response => {
-
-            console.log("BLOCKED HISTORY STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("BLOCKED HISTORY RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Browsing history request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(history => {
-
-            const blockedCount = history.filter(
-                item => item.actionTaken === "BLOCK"
-            ).length;
-
-            console.log("Blocked websites:", blockedCount);
-
-            document.getElementById("blockedCount").textContent =
-                blockedCount;
-        })
-        .catch(error => {
-
-            console.error("Blocked count failed:", error);
-
-            document.getElementById("blockedCount").textContent =
-                "0";
-        });
-    function getReadableUrl(url) {
-
-        try {
-
-            const parsedUrl = new URL(url);
-
-            if (
-                parsedUrl.hostname.includes("google.com") &&
-                parsedUrl.pathname === "/search"
-            ) {
-
-                const query =
-                    parsedUrl.searchParams.get("q");
-
-                return "Google Search: " + (query || "Unknown");
-            }
-
-            let hostname = parsedUrl.hostname;
-
-            if (hostname.startsWith("www.")) {
-                hostname = hostname.substring(4);
-            }
-
-            return hostname;
-
-        } catch (error) {
-
-            return url;
-        }
+    import {
+        getMessaging,
+        getToken
     }
-    fetch("http://localhost:8080/api/browsing-history/child/3")
-        .then(async response => {
-
-            console.log("RECENT BROWSING STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("RECENT BROWSING RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Browsing history request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(history => {
-
-            console.log("Recent browsing history:", history);
-
-            const container =
-                document.getElementById("browsingActivity");
-
-            container.innerHTML = "";
-
-            const recentHistory =
-                history.slice(-10).reverse();
-
-            recentHistory.forEach(item => {
-
-                const entry = document.createElement("div");
-
-                entry.style.padding = "10px";
-                entry.style.borderBottom = "1px solid #ddd";
-
-                entry.innerHTML = `
-    <strong>${getReadableUrl(item.url)}</strong><br>
-    Category: ${item.category}<br>
-                Risk: ${item.riskLevel}<br>
-                Action: ${item.actionTaken}
-            `;
-
-                container.appendChild(entry);
-            });
-        })
-        .catch(error => {
-
-            console.error("Recent browsing failed:", error);
-
-            document.getElementById("browsingActivity").textContent =
-                "Unable to load browsing activity.";
-        });
-    fetch("http://localhost:8080/api/search-history/child/3")
-        .then(async response => {
-
-            console.log("RECENT SEARCHES STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("RECENT SEARCHES RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Search history request failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(searches => {
-
-            console.log("Recent searches:", searches);
-
-            const container =
-                document.getElementById("recentSearches");
-
-            container.innerHTML = "";
-
-            const recentSearches =
-                searches.slice(-10).reverse();
-
-            recentSearches.forEach(item => {
-
-                const entry = document.createElement("div");
-
-                entry.style.padding = "10px";
-                entry.style.borderBottom = "1px solid #ddd";
-
-                entry.innerHTML = `
-                <strong>${item.searchQuery}</strong><br>
-                Category: ${item.category}<br>
-                Risk: ${item.riskLevel}
-            `;
-
-                container.appendChild(entry);
-            });
-        })
-        .catch(error => {
-
-            console.error("Recent searches failed:", error);
-
-            document.getElementById("recentSearches").textContent =
-                "Unable to load recent searches.";
-        });
-    fetch("http://localhost:8080/api/access-requests/child/3")
-        .then(async response => {
-
-            console.log("ACCESS REQUESTS STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("ACCESS REQUESTS RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Access requests failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(requests => {
-
-            console.log("Access requests received:", requests);
-
-            const container =
-                document.getElementById("accessRequests");
-
-            container.innerHTML = "";
-
-            requests.forEach(request => {
-
-                const entry = document.createElement("div");
-
-                entry.style.padding = "10px";
-                entry.style.borderBottom = "1px solid #ddd";
-
-                entry.innerHTML = `
-                <strong>${request.url}</strong><br>
-                Status: ${request.status}<br>
-                Requested At: ${request.requestedAt}
-            `;
-
-                if (request.status === "PENDING") {
-
-                    const approveButton =
-                        document.createElement("button");
-
-                    approveButton.textContent = "Approve";
-                    approveButton.style.marginRight = "10px";
-
-                    approveButton.addEventListener("click", () => {
-
-                        respondToRequest(
-                            request.requestId,
-                            "APPROVED"
-                        );
-
-                    });
-
-                    const denyButton =
-                        document.createElement("button");
-
-                    denyButton.textContent = "Deny";
-
-                    denyButton.addEventListener("click", () => {
-
-                        respondToRequest(
-                            request.requestId,
-                            "DENIED"
-                        );
-
-                    });
-
-                    entry.appendChild(document.createElement("br"));
-                    entry.appendChild(approveButton);
-                    entry.appendChild(denyButton);
-                }
-
-                container.appendChild(entry);
-            });
-        })
-        .catch(error => {
-
-            console.error("Access requests failed:", error);
-
-            document.getElementById("accessRequests").textContent =
-                "Unable to load access requests.";
-        });
+        from "https://www.gstatic.com/firebasejs/12.3.0/firebase-messaging.js";
 
 
-    function respondToRequest(requestId, status) {
+    const firebaseConfig = {
 
-        fetch(
-            `http://localhost:8080/api/access-requests/${requestId}/respond?status=${status}`,
-            {
-                method: "PUT"
-            }
-        )
-            .then(async response => {
+        apiKey: "AIzaSyDvFshC6S4oBIUPx8HwLyaXJnbdpHOV8rg",
+
+        authDomain:
+            "cyberguardian-3a01c.firebaseapp.com",
+
+        projectId:
+            "cyberguardian-3a01c",
+
+        storageBucket:
+            "cyberguardian-3a01c.firebasestorage.app",
+
+        messagingSenderId:
+            "87226357807",
+
+        appId:
+            "1:87226357807:web:6f5ed297bbcc46d0660eda",
+
+        measurementId:
+            "G-T09RCWNB6W"
+    };
+
+
+    const app =
+        initializeApp(firebaseConfig);
+
+
+    const messaging =
+        getMessaging(app);
+
+
+    const notificationButton =
+        document.getElementById(
+            "enableNotifications"
+        );
+
+
+    notificationButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
 
                 console.log(
-                    "RESPOND REQUEST STATUS:",
+                    "Requesting notification permission..."
+                );
+
+
+                const permission =
+                    await Notification.requestPermission();
+
+
+                console.log(
+                    "Notification permission:",
+                    permission
+                );
+
+
+                if (permission !== "granted") {
+
+                    alert(
+                        "Notification permission was not granted."
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Use the existing CyberGuardian
+                 * service worker.
+                 */
+
+                const registration =
+                    await navigator.serviceWorker.ready;
+
+
+                const token =
+                    await getToken(
+                        messaging,
+                        {
+                            vapidKey:
+                                "BPEuTgUD64HIbd82Ng_w-chtm2-OvAlPh76spvZcoaZlctdRuBPo2s8hZq10nJdtlwDCr3P0NwM53z0FcRDpJEI",
+                            serviceWorkerRegistration:
+                            registration
+                        }
+                    );
+
+
+                console.log(
+                    "FCM TOKEN:",
+                    token
+                );
+                const response = await fetch(
+                    "http://localhost:8080/api/fcm/token?parentId=1&fcmToken="
+                    + encodeURIComponent(token),
+                    {
+                        method: "POST"
+                    }
+                );
+
+                console.log(
+                    "FCM TOKEN SAVE STATUS:",
                     response.status
                 );
 
-                const text = await response.text();
+                const savedToken = await response.json();
 
                 console.log(
-                    "RESPOND REQUEST RESPONSE:",
-                    text
+                    "FCM TOKEN SAVED:",
+                    savedToken
                 );
 
-                if (!response.ok) {
-                    throw new Error(
-                        "Failed to respond to access request"
+                if (!token) {
+
+                    console.error(
+                        "FCM token was not generated."
                     );
+
+                    return;
                 }
 
-                return JSON.parse(text);
-            })
-            .then(result => {
 
-                console.log(
-                    "Access request updated:",
-                    result
+                alert(
+                    "Notifications enabled successfully!"
                 );
 
-                location.reload();
-            })
-            .catch(error => {
+
+            }
+            catch (error) {
 
                 console.error(
-                    "Access request response failed:",
+                    "Firebase notification setup failed:",
                     error
                 );
 
-                alert("Failed to update access request.");
-            });
-    }
-    fetch("http://localhost:8080/api/weekly-report/child/3")
-        .then(async response => {
-
-            console.log("WEEKLY REPORT STATUS:", response.status);
-
-            const text = await response.text();
-
-            console.log("WEEKLY REPORT RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Weekly report failed with status " + response.status
+                alert(
+                    "Failed to enable notifications. " +
+                    "Check the browser console."
                 );
+
             }
 
-            return JSON.parse(text);
-        })
-        .then(report => {
+        }
+    );
 
-            console.log("Weekly report received:", report);
+</script>
+<script>
 
-            document.getElementById("weeklyWebsites").textContent =
-                report.totalWebsites;
+    const parentId = 1;
 
-            document.getElementById("weeklySearches").textContent =
-                report.totalSearches;
+    let selectedChildId =
+        localStorage.getItem("selectedChildId") || "";
 
-            document.getElementById("weeklyBlocked").textContent =
-                report.blockedWebsites;
+    /*
+     * Load all dashboard data after the children
+     * have been loaded and selected.
+     */
+    function loadDashboardData() {
 
-            document.getElementById("weeklyAlerts").textContent =
-                report.totalAlerts;
+        if (!selectedChildId) {
+            console.error("No child selected.");
+            return;
+        }
 
-            document.getElementById("weeklyHighRisk").textContent =
-                report.highRiskSearches;
-
-            document.getElementById("weeklyEducation").textContent =
-                report.educationSearches;
-
-            document.getElementById("weeklyEntertainment").textContent =
-                report.entertainmentSearches;
-
-            document.getElementById("weeklyGaming").textContent =
-                report.gamingSearches;
-
-            document.getElementById("weeklySports").textContent =
-                report.sportsSearches;
-
-            document.getElementById("weeklyOther").textContent =
-                report.otherSearches;
-
-            document.getElementById("weeklySafety").textContent =
-                report.safetyStatus;
-        })
-        .catch(error => {
-
-            console.error("Weekly report failed:", error);
-
-            document.getElementById("weeklySafety").textContent =
-                "Unable to load report.";
-        });
-    fetch("http://localhost:8080/api/alerts/parent/1")
-        .then(response => response.json())
-        .then(alerts => {
-
-            const container = document.getElementById("recentAlerts");
-
-            if (alerts.length === 0) {
-                container.innerHTML = "<p>No alerts.</p>";
-                return;
-            }
-
-            container.innerHTML = "";
-
-            alerts.slice().reverse().slice(0, 5).forEach(alert => {
-
-                const alertDiv = document.createElement("div");
-
-                let alertTitle = alert.alertType;
-
-                if (alert.alertType === "HIGH_RISK_SEARCH") {
-                    alertTitle = "⚠️ High-Risk Search";
-                }
-                else if (alert.alertType === "HIGH_RISK_WEBSITE") {
-                    alertTitle = "⚠️ High-Risk Website";
-                }
-                else if (alert.alertType === "TAMPER_DETECTED") {
-                    alertTitle = "🛡️ Extension Tampering Detected";
-                }
-                else if (alert.alertType === "ACCESS_REQUEST") {
-                    alertTitle = "🔔 Access Request";
-                }
-                else if (alert.alertType === "PHISHING_PATTERN") {
-                    alertTitle = "⚠️ Suspicious Search Pattern";
-                }
-                else if (alert.alertType === "RISK_DETECTED" || alert.alertType === "RISK") {
-                    alertTitle = "⚠️ Security Risk Detected";
-                }
-
-                alertDiv.innerHTML = `
-    <p><strong>${alertTitle}</strong></p>
-    <p>${alert.message}</p>
-
-    ${
-                    alert.read
-                        ? `<p><strong>Read</strong></p>`
-                        : `<button onclick="markAlertAsRead(${alert.alertId})">
-                Mark as Read
-           </button>`
-                }
-`;
-                container.appendChild(alertDiv);
-            });
-        })
-        .catch(error => {
-            console.error("Error loading alerts:", error);
-
-            document.getElementById("recentAlerts").innerHTML =
-                "<p>Failed to load alerts.</p>";
-        });
-    function markAlertAsRead(alertId) {
-
-        fetch(`http://localhost:8080/api/alerts/${alertId}/read`, {
-            method: "PUT"
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to mark alert as read");
-                }
-
-                return response.json();
-            })
-            .then(() => {
-                console.log("Alert marked as read:", alertId);
-
-                // Reload the dashboard alerts
-                location.reload();
-            })
-            .catch(error => {
-                console.error("Error marking alert as read:", error);
-            });
+        loadOverview();
+        loadBrowsingActivity();
+        loadRecentSearches();
+        loadAccessRequests();
+        loadWeeklyReport();
+        loadRecentAlerts();
+        loadGeminiAnalysis();
     }
-    fetch("http://localhost:8080/api/search-history/analyze/3")
-        .then(async response => {
 
-            console.log("GEMINI ANALYSIS STATUS:", response.status);
+    /* ----------------------------------------
+       CHILDREN
+    ---------------------------------------- */
 
-            const text = await response.text();
-
-            console.log("GEMINI ANALYSIS RESPONSE:", text);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Gemini analysis failed with status " + response.status
-                );
-            }
-
-            return JSON.parse(text);
-        })
-        .then(analysis => {
-
-            console.log("Gemini analysis received:", analysis);
-
-            document.getElementById("geminiCategory").textContent =
-                analysis.category;
-
-            document.getElementById("geminiIntent").textContent =
-                analysis.intent;
-
-            document.getElementById("geminiPattern").textContent =
-                analysis.pattern;
-
-            document.getElementById("geminiRisk").textContent =
-                analysis.riskLevel;
-
-            document.getElementById("geminiExplanation").textContent =
-                analysis.explanation;
-        })
-        .catch(error => {
-
-            console.error("Gemini analysis failed:", error);
-
-            document.getElementById("geminiCategory").textContent =
-                "Unable to analyze";
-
-            document.getElementById("geminiIntent").textContent =
-                "Unable to analyze";
-
-            document.getElementById("geminiPattern").textContent =
-                "Unable to analyze";
-
-            document.getElementById("geminiRisk").textContent =
-                "Unable to analyze";
-
-            document.getElementById("geminiExplanation").textContent =
-                "Gemini analysis could not be loaded.";
-        });
-    if ("serviceWorker" in navigator) {
-
-        window.addEventListener("load", () => {
-
-            navigator.serviceWorker
-                .register("service-worker.js")
-                .then(registration => {
-
-                    console.log(
-                        "Service Worker registered:",
-                        registration.scope
-                    );
-
-                })
-                .catch(error => {
-
-                    console.error(
-                        "Service Worker registration failed:",
-                        error
-                    );
-
-                });
-
-        });
-
-    }
     function loadChildren() {
 
         fetch(
@@ -1154,8 +735,11 @@
                     return;
                 }
 
-                // If no child is selected yet,
-                // select the first child.
+                /*
+                 * If the stored child does not exist anymore,
+                 * select the first child.
+                 */
+
                 if (
                     !selectedChildId ||
                     !children.some(
@@ -1179,7 +763,8 @@
                     const option =
                         document.createElement("option");
 
-                    option.value = child.childId;
+                    option.value =
+                        child.childId;
 
                     option.textContent =
                         child.name;
@@ -1188,13 +773,19 @@
                         String(child.childId) ===
                         String(selectedChildId)
                     ) {
+
                         option.selected = true;
+
                     }
 
                     selector.appendChild(option);
+
                 });
 
-                // Display selected child information
+                /*
+                 * Display selected child information.
+                 */
+
                 const selectedChild =
                     children.find(
                         child =>
@@ -1214,6 +805,13 @@
                             ? "🟢 Connected"
                             : "🔴 Disconnected";
                 }
+
+                /*
+                 * Now that selectedChildId is known,
+                 * load all child-specific dashboard data.
+                 */
+
+                loadDashboardData();
 
             })
             .catch(error => {
@@ -1236,6 +834,7 @@
                     "Unknown";
             });
     }
+
     function changeSelectedChild() {
 
         const selector =
@@ -1251,6 +850,1140 @@
 
         location.reload();
     }
+
+
+    /* ----------------------------------------
+       OVERVIEW
+    ---------------------------------------- */
+
+    function loadOverview() {
+
+        /*
+         * Website count
+         */
+
+        fetch(
+            `http://localhost:8080/api/browsing-history/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "BROWSING HISTORY STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "BROWSING HISTORY RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Browsing history request failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(history => {
+
+                document.getElementById("websiteCount")
+                    .textContent =
+                    history.length;
+
+                const blockedCount =
+                    history.filter(
+                        item =>
+                            item.actionTaken === "BLOCK"
+                    ).length;
+
+                document.getElementById("blockedCount")
+                    .textContent =
+                    blockedCount;
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Browsing history failed:",
+                    error
+                );
+
+                document.getElementById("websiteCount")
+                    .textContent =
+                    "0";
+
+                document.getElementById("blockedCount")
+                    .textContent =
+                    "0";
+            });
+
+
+        /*
+         * Search count
+         */
+
+        fetch(
+            `http://localhost:8080/api/search-history/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "SEARCH HISTORY STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "SEARCH HISTORY RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Search history request failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(searches => {
+
+                document.getElementById("searchCount")
+                    .textContent =
+                    searches.length;
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Search history failed:",
+                    error
+                );
+
+                document.getElementById("searchCount")
+                    .textContent =
+                    "0";
+            });
+
+
+        /*
+         * Parent-level alert count.
+         *
+         * This intentionally uses all alerts belonging
+         * to the parent, not only the selected child.
+         */
+
+        fetch(
+            `http://localhost:8080/api/alerts/parent/${parentId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "ALERTS STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "ALERTS RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Alerts request failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(alerts => {
+
+                document.getElementById("alertCount")
+                    .textContent =
+                    alerts.length;
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Alerts failed:",
+                    error
+                );
+
+                document.getElementById("alertCount")
+                    .textContent =
+                    "0";
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       READABLE URL
+    ---------------------------------------- */
+
+    function getReadableUrl(url) {
+
+        try {
+
+            const parsedUrl =
+                new URL(url);
+
+            if (
+                parsedUrl.hostname.includes("google.com") &&
+                parsedUrl.pathname === "/search"
+            ) {
+
+                const query =
+                    parsedUrl.searchParams.get("q");
+
+                return "Google Search: "
+                    + (query || "Unknown");
+            }
+
+            let hostname =
+                parsedUrl.hostname;
+
+            if (hostname.startsWith("www.")) {
+
+                hostname =
+                    hostname.substring(4);
+            }
+
+            return hostname;
+
+        }
+        catch (error) {
+
+            return url;
+        }
+    }
+
+
+    /* ----------------------------------------
+       RECENT BROWSING ACTIVITY
+    ---------------------------------------- */
+
+    function loadBrowsingActivity() {
+
+        fetch(
+            `http://localhost:8080/api/browsing-history/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "RECENT BROWSING STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "RECENT BROWSING RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Browsing history request failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(history => {
+
+                const container =
+                    document.getElementById(
+                        "browsingActivity"
+                    );
+
+                container.innerHTML = "";
+
+                const recentHistory =
+                    history
+                        .slice(-10)
+                        .reverse();
+
+                if (recentHistory.length === 0) {
+
+                    container.textContent =
+                        "No browsing activity.";
+
+                    return;
+                }
+
+                recentHistory.forEach(item => {
+
+                    const entry =
+                        document.createElement("div");
+
+                    entry.innerHTML = `
+                        <strong>${getReadableUrl(item.url)}</strong><br>
+                        Category: ${item.category}<br>
+                        Risk: ${item.riskLevel}<br>
+                        Action: ${item.actionTaken}
+                    `;
+
+                    container.appendChild(entry);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Recent browsing failed:",
+                    error
+                );
+
+                document.getElementById(
+                    "browsingActivity"
+                ).textContent =
+                    "Unable to load browsing activity.";
+
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       RECENT SEARCHES
+    ---------------------------------------- */
+
+    function loadRecentSearches() {
+
+        fetch(
+            `http://localhost:8080/api/search-history/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "RECENT SEARCHES STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "RECENT SEARCHES RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Search history request failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(searches => {
+
+                const container =
+                    document.getElementById(
+                        "recentSearches"
+                    );
+
+                container.innerHTML = "";
+
+                const recentSearches =
+                    searches
+                        .slice(-10)
+                        .reverse();
+
+                if (recentSearches.length === 0) {
+
+                    container.textContent =
+                        "No recent searches.";
+
+                    return;
+                }
+
+                recentSearches.forEach(item => {
+
+                    const entry =
+                        document.createElement("div");
+
+                    entry.innerHTML = `
+                        <strong>${item.searchQuery}</strong><br>
+                        Category: ${item.category}<br>
+                        Risk: ${item.riskLevel}
+                    `;
+
+                    container.appendChild(entry);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Recent searches failed:",
+                    error
+                );
+
+                document.getElementById(
+                    "recentSearches"
+                ).textContent =
+                    "Unable to load recent searches.";
+
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       ACCESS REQUESTS
+    ---------------------------------------- */
+
+    function loadAccessRequests() {
+
+        fetch(
+            `http://localhost:8080/api/access-requests/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "ACCESS REQUESTS STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "ACCESS REQUESTS RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Access requests failed with status "
+                        + response.status
+                    );
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(requests => {
+
+                const container =
+                    document.getElementById(
+                        "accessRequests"
+                    );
+
+                container.innerHTML = "";
+
+                if (requests.length === 0) {
+
+                    container.textContent =
+                        "No access requests.";
+
+                    return;
+                }
+
+                requests.forEach(request => {
+
+                    const entry =
+                        document.createElement("div");
+
+                    entry.innerHTML = `
+                        <strong>${request.url}</strong><br>
+                        Status: ${request.status}<br>
+                        Requested At: ${request.requestedAt}
+                    `;
+
+                    if (
+                        request.status === "PENDING"
+                    ) {
+
+                        const approveButton =
+                            document.createElement("button");
+
+                        approveButton.textContent =
+                            "Approve";
+
+                        approveButton.style.marginRight =
+                            "10px";
+
+                        approveButton.addEventListener(
+                            "click",
+                            () => {
+
+                                respondToRequest(
+                                    request.requestId,
+                                    "APPROVED"
+                                );
+
+                            }
+                        );
+
+                        const denyButton =
+                            document.createElement("button");
+
+                        denyButton.textContent =
+                            "Deny";
+
+                        denyButton.addEventListener(
+                            "click",
+                            () => {
+
+                                respondToRequest(
+                                    request.requestId,
+                                    "DENIED"
+                                );
+
+                            }
+                        );
+
+                        entry.appendChild(
+                            document.createElement("br")
+                        );
+
+                        entry.appendChild(
+                            approveButton
+                        );
+
+                        entry.appendChild(
+                            denyButton
+                        );
+
+                    }
+
+                    container.appendChild(entry);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Access requests failed:",
+                    error
+                );
+
+                document.getElementById(
+                    "accessRequests"
+                ).textContent =
+                    "Unable to load access requests.";
+
+            });
+
+    }
+
+
+    function respondToRequest(
+        requestId,
+        status
+    ) {
+
+        fetch(
+            `http://localhost:8080/api/access-requests/${requestId}/respond?status=${status}`,
+            {
+                method: "PUT"
+            }
+        )
+            .then(async response => {
+
+                console.log(
+                    "RESPOND REQUEST STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "RESPOND REQUEST RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to respond to access request"
+                    );
+
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(result => {
+
+                console.log(
+                    "Access request updated:",
+                    result
+                );
+
+                location.reload();
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Access request response failed:",
+                    error
+                );
+
+                alert(
+                    "Failed to update access request."
+                );
+
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       WEEKLY REPORT
+    ---------------------------------------- */
+
+    function loadWeeklyReport() {
+
+        fetch(
+            `http://localhost:8080/api/weekly-report/child/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "WEEKLY REPORT STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "WEEKLY REPORT RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Weekly report failed with status "
+                        + response.status
+                    );
+
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(report => {
+
+                document.getElementById(
+                    "weeklyWebsites"
+                ).textContent =
+                    report.totalWebsites;
+
+                document.getElementById(
+                    "weeklySearches"
+                ).textContent =
+                    report.totalSearches;
+
+                document.getElementById(
+                    "weeklyBlocked"
+                ).textContent =
+                    report.blockedWebsites;
+
+                document.getElementById(
+                    "weeklyAlerts"
+                ).textContent =
+                    report.totalAlerts;
+
+                document.getElementById(
+                    "weeklyHighRisk"
+                ).textContent =
+                    report.highRiskSearches;
+
+                document.getElementById(
+                    "weeklyEducation"
+                ).textContent =
+                    report.educationSearches;
+
+                document.getElementById(
+                    "weeklyEntertainment"
+                ).textContent =
+                    report.entertainmentSearches;
+
+                document.getElementById(
+                    "weeklyGaming"
+                ).textContent =
+                    report.gamingSearches;
+
+                document.getElementById(
+                    "weeklySports"
+                ).textContent =
+                    report.sportsSearches;
+
+                document.getElementById(
+                    "weeklyOther"
+                ).textContent =
+                    report.otherSearches;
+
+                document.getElementById(
+                    "weeklySafety"
+                ).textContent =
+                    report.safetyStatus;
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Weekly report failed:",
+                    error
+                );
+
+                document.getElementById(
+                    "weeklySafety"
+                ).textContent =
+                    "Unable to load report.";
+
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       RECENT ALERTS
+    ---------------------------------------- */
+
+    function loadRecentAlerts() {
+
+        fetch(
+            `http://localhost:8080/api/alerts/parent/${parentId}`
+        )
+            .then(async response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load alerts"
+                    );
+
+                }
+
+                return response.json();
+
+            })
+            .then(alerts => {
+
+                /*
+                 * The parent-level alert count includes
+                 * alerts from all children.
+                 *
+                 * Recent Alerts displays only alerts
+                 * belonging to the selected child.
+                 */
+
+                const childAlerts =
+                    alerts.filter(
+                        alert =>
+                            String(alert.childId) ===
+                            String(selectedChildId)
+                    );
+
+                const container =
+                    document.getElementById(
+                        "recentAlerts"
+                    );
+
+                if (childAlerts.length === 0) {
+
+                    container.innerHTML =
+                        "<p>No alerts for this child.</p>";
+
+                    return;
+                }
+
+                container.innerHTML = "";
+
+                childAlerts
+                    .slice()
+                    .reverse()
+                    .slice(0, 5)
+                    .forEach(alert => {
+
+                        const alertDiv =
+                            document.createElement("div");
+
+                        let alertTitle =
+                            alert.alertType;
+
+                        if (
+                            alert.alertType ===
+                            "HIGH_RISK_SEARCH"
+                        ) {
+
+                            alertTitle =
+                                "⚠️ High-Risk Search";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "HIGH_RISK_WEBSITE"
+                        ) {
+
+                            alertTitle =
+                                "⚠️ High-Risk Website";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "TAMPER_DETECTED"
+                        ) {
+
+                            alertTitle =
+                                "🛡️ Extension Tampering Detected";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "ACCESS_REQUEST"
+                        ) {
+
+                            alertTitle =
+                                "🔔 Access Request";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "PHISHING_PATTERN"
+                        ) {
+
+                            alertTitle =
+                                "⚠️ Suspicious Search Pattern";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "RISK_DETECTED" ||
+                            alert.alertType ===
+                            "RISK"
+                        ) {
+
+                            alertTitle =
+                                "⚠️ Security Risk Detected";
+
+                        }
+                        else if (
+                            alert.alertType ===
+                            "HIGH_RISK_SEARCH_PATTERN"
+                        ) {
+
+                            alertTitle =
+                                "⚠️ High-Risk Search Pattern";
+
+                        }
+
+                        const title =
+                            document.createElement("p");
+
+                        const strong =
+                            document.createElement("strong");
+
+                        strong.textContent =
+                            alertTitle;
+
+                        title.appendChild(strong);
+
+                        alertDiv.appendChild(title);
+
+
+                        const message =
+                            document.createElement("p");
+
+                        message.textContent =
+                            alert.message;
+
+                        alertDiv.appendChild(message);
+
+
+                        if (alert.read) {
+
+                            const readText =
+                                document.createElement("p");
+
+                            const readStrong =
+                                document.createElement("strong");
+
+                            readStrong.textContent =
+                                "Read";
+
+                            readText.appendChild(
+                                readStrong
+                            );
+
+                            alertDiv.appendChild(
+                                readText
+                            );
+
+                        }
+                        else {
+
+                            const readButton =
+                                document.createElement(
+                                    "button"
+                                );
+
+                            readButton.textContent =
+                                "Mark as Read";
+
+                            readButton.addEventListener(
+                                "click",
+                                () => {
+
+                                    markAlertAsRead(
+                                        alert.alertId
+                                    );
+
+                                }
+                            );
+
+                            alertDiv.appendChild(
+                                readButton
+                            );
+
+                        }
+
+                        container.appendChild(
+                            alertDiv
+                        );
+
+                    });
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Error loading alerts:",
+                    error
+                );
+
+                document.getElementById(
+                    "recentAlerts"
+                ).innerHTML =
+                    "<p>Failed to load alerts.</p>";
+
+            });
+
+    }
+
+
+    function markAlertAsRead(alertId) {
+
+        fetch(
+            `http://localhost:8080/api/alerts/${alertId}/read`,
+            {
+                method: "PUT"
+            }
+        )
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to mark alert as read"
+                    );
+
+                }
+
+                return response.json();
+
+            })
+            .then(() => {
+
+                console.log(
+                    "Alert marked as read:",
+                    alertId
+                );
+
+                location.reload();
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Error marking alert as read:",
+                    error
+                );
+
+            });
+
+    }
+
+
+    /* ----------------------------------------
+       GEMINI SEARCH ANALYSIS
+    ---------------------------------------- */
+
+    function loadGeminiAnalysis() {
+
+        const category =
+            document.getElementById("geminiCategory");
+
+        const intent =
+            document.getElementById("geminiIntent");
+
+        const pattern =
+            document.getElementById("geminiPattern");
+
+        const risk =
+            document.getElementById("geminiRisk");
+
+        const explanation =
+            document.getElementById("geminiExplanation");
+
+        category.textContent = "Analyzing...";
+        intent.textContent = "Analyzing...";
+        pattern.textContent = "Analyzing...";
+        risk.textContent = "Analyzing...";
+        explanation.textContent = "Analyzing recent searches...";
+
+        fetch(
+            `http://localhost:8080/api/search-history/analyze/${selectedChildId}`
+        )
+            .then(async response => {
+
+                console.log(
+                    "GEMINI ANALYSIS STATUS:",
+                    response.status
+                );
+
+                const text =
+                    await response.text();
+
+                console.log(
+                    "GEMINI ANALYSIS RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Gemini analysis failed with status "
+                        + response.status
+                    );
+
+                }
+
+                return JSON.parse(text);
+
+            })
+            .then(analysis => {
+
+                category.textContent =
+                    analysis.category || "N/A";
+
+                intent.textContent =
+                    analysis.intent || "N/A";
+
+                pattern.textContent =
+                    analysis.pattern || "N/A";
+
+                risk.textContent =
+                    analysis.riskLevel || "N/A";
+
+                explanation.textContent =
+                    analysis.explanation ||
+                    "No explanation available.";
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Gemini analysis failed:",
+                    error
+                );
+
+                category.textContent =
+                    "Unavailable";
+
+                intent.textContent =
+                    "Unavailable";
+
+                pattern.textContent =
+                    "Unavailable";
+
+                risk.textContent =
+                    "Unavailable";
+
+                explanation.textContent =
+                    "AI analysis is temporarily unavailable. " +
+                    "Website blocking and other CyberGuardian " +
+                    "security features continue to work normally.";
+
+            });
+
+    }
+
+    /* ----------------------------------------
+       SERVICE WORKER
+    ---------------------------------------- */
+
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            () => {
+
+                navigator.serviceWorker
+                    .register("service-worker.js")
+                    .then(registration => {
+
+                        console.log(
+                            "Service Worker registered:",
+                            registration.scope
+                        );
+
+                    })
+                    .catch(error => {
+
+                        console.error(
+                            "Service Worker registration failed:",
+                            error
+                        );
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* ----------------------------------------
+       START DASHBOARD
+    ---------------------------------------- */
+
+    loadChildren();
+
 </script>
+
 </body>
 </html>

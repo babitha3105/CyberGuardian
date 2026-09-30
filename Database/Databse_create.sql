@@ -131,3 +131,61 @@ SELECT * from browsing_history;
 SELECT request_id, child_id, url, status
 FROM access_requests
 WHERE request_id = 6;
+select * from access_requests;
+
+SELECT source, COUNT(*) AS total
+FROM website_lists
+WHERE list_type = 'BLACKLIST'
+GROUP BY source;
+
+SELECT source, COUNT(*) AS total
+FROM website_lists
+GROUP BY source;
+
+SELECT domain
+FROM website_lists
+WHERE source = 'STEVENBLACK_GAMBLING'
+LIMIT 5;
+SELECT COUNT(*) AS total
+FROM website_lists
+WHERE source = 'URLHAUS';
+DESCRIBE website_lists;
+
+CREATE TABLE urlhaus_threats (
+    threat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    url VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+SELECT COUNT(*) 
+FROM urlhaus_threats;
+SELECT * 
+FROM urlhaus_threats
+LIMIT 5;
+
+SELECT COUNT(*)
+FROM website_lists
+WHERE source = 'URLHAUS';
+
+INSERT INTO website_lists (domain, list_type, source)
+VALUES ('115.199.196.35', 'WHITELIST', 'TEST');
+SELECT list_id, domain, list_type, source
+FROM website_lists
+WHERE domain = '115.199.196.35'
+  AND list_type = 'WHITELIST'
+  AND source = 'TEST';
+  DELETE FROM website_lists
+WHERE list_id = 83418;
+
+SELECT *
+FROM website_lists
+WHERE domain = '115.199.196.35';
+
+CREATE TABLE openphish_threats (
+    threat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    url VARCHAR(1000) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+DESCRIBE openphish_threats;
+SELECT *
+FROM openphish_threats
+LIMIT 5;

@@ -69,8 +69,7 @@ if (reason === "PARENT_POLICY") {
                 return;
             }
 
-
-            // PENDING
+// PENDING
             if (
                 matchingRequest &&
                 matchingRequest.status === "PENDING"
@@ -84,11 +83,16 @@ if (reason === "PARENT_POLICY") {
                     document.createElement("p");
 
                 pendingMessage.textContent =
-                    "Access request is pending.";
+                    "Access request is pending. Waiting for parent approval...";
 
                 document.body.appendChild(
                     pendingMessage
                 );
+
+                // Check again after 5 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000);
 
                 return;
             }
@@ -178,6 +182,20 @@ if (reason === "PARENT_POLICY") {
 
                         requestButton.disabled =
                             true;
+
+                        console.log(
+                            "Waiting for parent approval..."
+                        );
+
+                        setTimeout(() => {
+
+                            console.log(
+                                "Checking access request status again..."
+                            );
+
+                            window.location.reload();
+
+                        }, 5000);
 
                     })
                     .catch(error => {
