@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/policies/**",
                                 "/api/children/**",
                                 "/api/fcm/**",
+                                "/api/alerts/child/**",
                                 "/api/weekly-report/**"
                         ).permitAll()
                         .anyRequest().authenticated()

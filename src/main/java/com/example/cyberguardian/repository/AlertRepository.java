@@ -21,4 +21,5 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
             Long childId,
             String alertType
     );
+    List<Alert> findByChildChildId(Long childId);
 }

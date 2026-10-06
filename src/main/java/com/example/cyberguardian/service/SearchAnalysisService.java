@@ -46,7 +46,6 @@ public class SearchAnalysisService {
 
         int score = 0;
 
-        // Suspicious intent patterns
         if (query.contains("how to hack") ||
                 query.contains("hack someone's") ||
                 query.contains("hack an account") ||
@@ -55,7 +54,6 @@ public class SearchAnalysisService {
             score += 4;
         }
 
-        // Tool acquisition patterns
         if (query.contains("download hacking tool") ||
                 query.contains("password cracker") ||
                 query.contains("hacking tool")) {
@@ -63,7 +61,6 @@ public class SearchAnalysisService {
             score += 4;
         }
 
-        // Explicitly unsafe topics
         if (query.contains("make a bomb") ||
                 query.contains("make explosive") ||
                 query.contains("buy weapon")) {
@@ -71,23 +68,17 @@ public class SearchAnalysisService {
             score += 4;
         }
 
-        // Adult content
         if (query.contains("porn") ||
                 query.contains("xxx")) {
 
             score += 4;
         }
 
-        // Convert score to risk level
-        if (score >= 6) {
+        // HIGH risk if the query matches at least one high-risk rule
+        if (score >= 4) {
             return "HIGH";
-        }
-
-        if (score >= 3) {
-            return "MEDIUM";
         }
 
         return "LOW";
     }
-
 }

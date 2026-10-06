@@ -22,9 +22,14 @@ public class ParentService {
     }
 
     public Parent saveParent(Parent parent) {
+
+        String hashedPassword =
+                passwordEncoder.encode(parent.getPasswordHash());
+
+        parent.setPasswordHash(hashedPassword);
+
         return parentRepository.save(parent);
     }
-
     public Optional<Parent> getParentById(Long parentId) {
         return parentRepository.findById(parentId);
     }

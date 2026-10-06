@@ -13,12 +13,14 @@ import org.springframework.stereotype.Service;
 import com.example.cyberguardian.entity.Alert;
 import com.example.cyberguardian.entity.Child;
 import com.example.cyberguardian.repository.ChildRepository;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class GeminiSearchAnalysisService {
+
     private final AlertService alertService;
     private final ChildRepository childRepository;
 
@@ -34,10 +36,11 @@ public class GeminiSearchAnalysisService {
             List<String> searches) {
 
         if (searches == null || searches.isEmpty()) {
+
             GeminiSearchAnalysisDTO result =
                     new GeminiSearchAnalysisDTO();
 
-            result.setCategory("OTHER");
+            result.setCategories(List.of("OTHER"));
             result.setIntent("UNCLEAR");
             result.setPattern("UNCLEAR");
             result.setRiskLevel("LOW");
@@ -57,20 +60,27 @@ public class GeminiSearchAnalysisService {
                 Analyze the searches as a GROUP, not individually.
 
                 Identify:
-                1. Overall category
-                2. Apparent intent
-                3. Search pattern
-                4. Risk level
-                5. Short explanation
+                1. Overall categories (one or more)
+                2. Apparent overall intent
+                3. Overall search pattern
+                4. Overall risk level
+                5. Short explanation of the group
 
-                Allowed categories:
+                Categories:
                 EDUCATION, SPORTS, ENTERTAINMENT, GAMING,
                 SOCIAL_MEDIA, SHOPPING, CYBERSECURITY, HEALTH, OTHER
+
+                Return one or more categories when the searches cover
+                different topics.
+
+                If the searches clearly belong to different unrelated
+                categories, include all relevant categories rather than
+                choosing only one.
 
                 Allowed intents:
                 LEARNING, RESEARCH, ENTERTAINMENT, SHOPPING, SOCIAL,
                 TROUBLESHOOTING, INFORMATION_SEEKING,
-                POTENTIALLY_HARMFUL, UNCLEAR
+                POTENTIALLY_HARMFUL, UNCLEAR, MIXED
 
                 Allowed patterns:
                 NORMAL, REPEATED, EXPLORATORY, ESCALATING,
@@ -82,6 +92,9 @@ public class GeminiSearchAnalysisService {
                 Do not make assumptions beyond the searches provided.
                 Do not use this analysis to block websites.
 
+                The analysis must represent the GROUP of searches,
+                not just the most prominent individual search.
+
                 Return only the requested structured JSON.
 
                 Searches:
@@ -91,14 +104,21 @@ public class GeminiSearchAnalysisService {
             prompt.append("- ").append(search).append("\n");
         }
 
+        Schema categoryItemSchema =
+                Schema.builder()
+                        .type(Type.Known.STRING)
+                        .build();
+
         Schema schema =
                 Schema.builder()
                         .type(Type.Known.OBJECT)
                         .properties(
                                 Map.of(
-                                        "category",
+
+                                        "categories",
                                         Schema.builder()
-                                                .type(Type.Known.STRING)
+                                                .type(Type.Known.ARRAY)
+                                                .items(categoryItemSchema)
                                                 .build(),
 
                                         "intent",
@@ -123,7 +143,7 @@ public class GeminiSearchAnalysisService {
                                 )
                         )
                         .required(Arrays.asList(
-                                "category",
+                                "categories",
                                 "intent",
                                 "pattern",
                                 "riskLevel",
@@ -137,9 +157,10 @@ public class GeminiSearchAnalysisService {
                         .responseSchema(schema)
                         .build();
 
-        HttpOptions httpOptions = HttpOptions.builder()
-                .timeout(120000)
-                .build();
+        HttpOptions httpOptions =
+                HttpOptions.builder()
+                        .timeout(120000)
+                        .build();
 
         try (Client client = Client.builder()
                 .httpOptions(httpOptions)
@@ -156,7 +177,9 @@ public class GeminiSearchAnalysisService {
                     );
 
             System.out.println("GEMINI API CALL RETURNED");
-            System.out.println("GEMINI RESPONSE: " + response.text());
+            System.out.println(
+                    "GEMINI RESPONSE: " + response.text()
+            );
 
             Gson gson = new Gson();
 
@@ -176,7 +199,7 @@ public class GeminiSearchAnalysisService {
             GeminiSearchAnalysisDTO result =
                     new GeminiSearchAnalysisDTO();
 
-            result.setCategory("OTHER");
+            result.setCategories(List.of("OTHER"));
             result.setIntent("UNCLEAR");
             result.setPattern("UNCLEAR");
             result.setRiskLevel("LOW");
@@ -212,7 +235,9 @@ public class GeminiSearchAnalysisService {
 
                 Child child = childRepository.findById(childId)
                         .orElseThrow(() ->
-                                new RuntimeException("Child not found"));
+                                new RuntimeException(
+                                        "Child not found"
+                                ));
 
                 Alert alert = new Alert();
 

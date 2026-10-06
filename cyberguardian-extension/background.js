@@ -1,6 +1,25 @@
 console.log("CyberGuardian extension started");
-const connectionCode = "B668C3";
+const connectionCode = "EDBFA4";
 let childId = null;
+
+chrome.storage.local.get(["childId"], (result) => {
+
+    if (result.childId) {
+
+        childId = result.childId;
+
+        console.log(
+            "Saved childId restored:",
+            childId
+        );
+
+    } else {
+
+        console.log(
+            "No saved childId found."
+        );
+    }
+});
 chrome.alarms.create("heartbeat", {
    periodInMinutes: 1
 });
@@ -57,11 +76,20 @@ fetch(
 
         return JSON.parse(text);
     })
-        .then(child => {
+    .then(child => {
 
         childId = child.childId;
 
-        console.log("CyberGuardian connected to child:", childId);
+        chrome.storage.local.set(
+            { childId: childId },
+            () => {
+
+                console.log(
+                    "Child connected and childId saved:",
+                    childId
+                );
+            }
+        );
     })
     .catch(error => {
         console.error("Child connection failed:", error);

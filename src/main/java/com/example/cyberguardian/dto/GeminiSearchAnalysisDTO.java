@@ -1,8 +1,10 @@
 package com.example.cyberguardian.dto;
 
+import java.util.List;
+
 public class GeminiSearchAnalysisDTO {
 
-    private String category;
+    private List<String> categories;
     private String intent;
     private String pattern;
     private String riskLevel;
@@ -11,12 +13,12 @@ public class GeminiSearchAnalysisDTO {
     public GeminiSearchAnalysisDTO() {
     }
 
-    public String getCategory() {
-        return category;
+    public List<String> getCategories() {
+        return categories;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 
     public String getIntent() {

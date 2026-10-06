@@ -45,7 +45,16 @@ if (reason === "PARENT_POLICY") {
             );
 
             const matchingRequests = requests
-                .filter(request => request.url === blockedUrl)
+                .filter(request => {
+
+                    try {
+                        return new URL(request.url).href ===
+                            new URL(blockedUrl).href;
+                    } catch (error) {
+                        return request.url === blockedUrl;
+                    }
+
+                })
                 .sort(
                     (a, b) =>
                         new Date(b.requestedAt) -
@@ -79,15 +88,20 @@ if (reason === "PARENT_POLICY") {
                     "Access request is already pending."
                 );
 
+                const requestSection =
+                    document.getElementById("requestSection");
+
                 const pendingMessage =
                     document.createElement("p");
 
                 pendingMessage.textContent =
                     "Access request is pending. Waiting for parent approval...";
 
-                document.body.appendChild(
-                    pendingMessage
-                );
+                pendingMessage.className =
+                    "request-message";
+
+                requestSection.appendChild(
+                    pendingMessage);
 
                 // Check again after 5 seconds
                 setTimeout(() => {
@@ -103,13 +117,19 @@ if (reason === "PARENT_POLICY") {
                 "No active access request found."
             );
 
+            const requestSection =
+                document.getElementById("requestSection");
+
             const requestButton =
                 document.createElement("button");
 
             requestButton.textContent =
-                "Request Access";
+                "🔓 Request Access";
 
-            document.body.appendChild(
+            requestButton.className =
+                "request-button";
+
+            requestSection.appendChild(
                 requestButton);
 
 

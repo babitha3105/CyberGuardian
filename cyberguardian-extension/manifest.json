@@ -5,7 +5,9 @@
   "description": "AI-Assisted Web Threat Detection and Parent Alert System",
 
   "permissions": [
-    "tabs","alarms"
+    "storage",
+    "tabs",
+    "alarms"
   ],
 
   "host_permissions": [

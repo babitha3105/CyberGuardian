@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
+
     List<Policy> findByChildChildId(Long childId);
+
     Optional<Policy> findByChildChildIdAndTargetValue(
             Long childId,
             String targetValue
     );
 }
+

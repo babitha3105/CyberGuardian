@@ -116,25 +116,27 @@
                 id="website"
                 placeholder="Enter website, e.g. example.com"
                 style="
-            padding: 10px;
-            width: 60%;
-            margin-right: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-        "
+                    padding: 10px;
+                    width: 60%;
+                    margin-right: 10px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                "
         >
 
         <select
                 id="action"
                 style="
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-        "
+                    padding: 10px;
+                    margin-right: 10px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                "
         >
+
             <option value="BLOCK">BLOCK</option>
             <option value="ALLOW">ALLOW</option>
+
         </select>
 
         <button onclick="createPolicy()">
@@ -144,25 +146,53 @@
     </div>
 
 </div>
+
 <script>
+
+    const token =
+        localStorage.getItem("jwtToken");
+
+    const selectedChildId =
+        localStorage.getItem("selectedChildId");
+
+    if (!token) {
+
+        window.location.href = "login.html";
+
+    }
+
+    if (!selectedChildId) {
+
+        alert("No child selected.");
+
+        window.location.href = "index.html";
+
+    }
+
 
     function createPolicy() {
 
         const website =
-            document.getElementById("website").value.trim();
+            document.getElementById("website")
+                .value
+                .trim();
 
         const action =
-            document.getElementById("action").value;
+            document.getElementById("action")
+                .value;
 
         if (website === "") {
+
             alert("Please enter a website.");
+
             return;
+
         }
 
         const policyData = {
 
             child: {
-                childId: 3
+                childId: Number(selectedChildId)
             },
 
             targetType: "WEBSITE",
@@ -170,19 +200,29 @@
             targetValue: website,
 
             action: action
+
         };
 
-        fetch("http://localhost:8080/api/policies", {
+        fetch(
+            "http://localhost:8080/api/policies",
+            {
+                method: "POST",
 
-            method: "POST",
+                headers: {
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                    "Content-Type":
+                        "application/json",
 
-            body: JSON.stringify(policyData)
+                    "Authorization":
+                        "Bearer " + token
 
-        })
+                },
+
+                body:
+                    JSON.stringify(policyData)
+
+            }
+        )
             .then(async response => {
 
                 console.log(
@@ -217,9 +257,13 @@
                     policy
                 );
 
-                alert("Policy added successfully!");
+                alert(
+                    "Policy added successfully!"
+                );
 
-                document.getElementById("website").value = "";
+                document.getElementById(
+                    "website"
+                ).value = "";
 
                 loadPolicies();
 
@@ -231,14 +275,31 @@
                     error
                 );
 
-                alert("Failed to add policy.");
+                alert(
+                    "Failed to add policy."
+                );
 
             });
+
     }
+
+
     function loadPolicies() {
 
-        fetch("http://localhost:8080/api/policies/child/3")
+        fetch(
+            `http://localhost:8080/api/policies/child/${selectedChildId}`,
+            {
+                method: "GET",
 
+                headers: {
+
+                    "Authorization":
+                        "Bearer " + token
+
+                }
+
+            }
+        )
             .then(async response => {
 
                 console.log(
@@ -246,7 +307,8 @@
                     response.status
                 );
 
-                const text = await response.text();
+                const text =
+                    await response.text();
 
                 console.log(
                     "POLICIES RESPONSE:",
@@ -264,7 +326,6 @@
                 return JSON.parse(text);
 
             })
-
             .then(policies => {
 
                 console.log(
@@ -273,7 +334,9 @@
                 );
 
                 const container =
-                    document.getElementById("policyList");
+                    document.getElementById(
+                        "policyList"
+                    );
 
                 container.innerHTML = "";
 
@@ -289,61 +352,85 @@
                 policies.forEach(policy => {
 
                     const entry =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
-                    entry.style.padding = "12px";
+                    entry.style.padding =
+                        "12px";
+
                     entry.style.borderBottom =
                         "1px solid #e5e7eb";
 
                     entry.innerHTML = `
-    <div style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-    ">
+                        <div style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            gap: 20px;
+                        ">
 
-        <div>
-            <strong style="font-size: 16px;">
-                ${policy.targetValue}
-            </strong>
+                            <div>
 
-            <div style="
-                margin-top: 5px;
-                color: #6b7280;
-                font-size: 14px;
-            ">
-                Action:
-                <strong>
-                    ${policy.action}
-                </strong>
-            </div>
-        </div>
+                                <strong style="
+                                    font-size: 16px;
+                                ">
+                                    ${policy.targetValue}
+                                </strong>
 
-        <div>
+                                <div style="
+                                    margin-top: 5px;
+                                    color: #6b7280;
+                                    font-size: 14px;
+                                ">
 
-            <button
-                onclick="editPolicy(${policy.policyId})"
-                style="margin-right: 5px;">
-                Edit
-            </button>
+                                    Action:
 
-            <button
-                onclick="deletePolicy(${policy.policyId})">
-                Delete
-            </button>
+                                    <strong>
+                                        ${policy.action}
+                                    </strong>
 
-        </div>
+                                </div>
 
-    </div>
-`;
+                            </div>
 
-                    container.appendChild(entry);
+                            <div>
+
+                                <button
+                                    onclick="
+                                        editPolicy(
+                                            ${policy.policyId}
+                                        )
+                                    "
+                                    style="
+                                        margin-right: 5px;
+                                    "
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    onclick="
+                                        deletePolicy(
+                                            ${policy.policyId}
+                                        )
+                                    "
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                    container.appendChild(
+                        entry
+                    );
 
                 });
 
             })
-
             .catch(error => {
 
                 console.error(
@@ -351,27 +438,41 @@
                     error
                 );
 
-                document.getElementById("policyList")
-                    .textContent =
+                document.getElementById(
+                    "policyList"
+                ).textContent =
                     "Unable to load policies.";
 
             });
+
     }
 
-    loadPolicies();
+
     function deletePolicy(policyId) {
 
         const confirmed =
-            confirm("Are you sure you want to delete this policy?");
+            confirm(
+                "Are you sure you want to delete this policy?"
+            );
 
         if (!confirmed) {
+
             return;
+
         }
 
         fetch(
             `http://localhost:8080/api/policies/${policyId}`,
             {
-                method: "DELETE"
+                method: "DELETE",
+
+                headers: {
+
+                    "Authorization":
+                        "Bearer " + token
+
+                }
+
             }
         )
             .then(async response => {
@@ -386,12 +487,15 @@
                     throw new Error(
                         "Policy deletion failed"
                     );
+
                 }
 
             })
             .then(() => {
 
-                alert("Policy deleted successfully.");
+                alert(
+                    "Policy deleted successfully."
+                );
 
                 loadPolicies();
 
@@ -403,94 +507,156 @@
                     error
                 );
 
-                alert("Failed to delete policy.");
+                alert(
+                    "Failed to delete policy."
+                );
 
             });
+
     }
+
+
     function editPolicy(policyId) {
 
         fetch(
-            `http://localhost:8080/api/policies/child/3`
+            `http://localhost:8080/api/policies/child/${selectedChildId}`,
+            {
+                method: "GET",
+
+                headers: {
+
+                    "Authorization":
+                        "Bearer " + token
+
+                }
+
+            }
         )
-            .then(response => response.json())
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to load policy"
+                    );
+
+                }
+
+                return response.json();
+
+            })
             .then(policies => {
 
                 const policy =
-                    policies.find(p => p.policyId === policyId);
+                    policies.find(
+                        p =>
+                            p.policyId === policyId
+                    );
 
                 if (!policy) {
-                    alert("Policy not found.");
+
+                    alert(
+                        "Policy not found."
+                    );
+
                     return;
+
                 }
 
                 const container =
-                    document.getElementById("policyList");
+                    document.getElementById(
+                        "policyList"
+                    );
 
                 container.innerHTML = `
-                <div style="
-                    padding: 15px;
-                    border: 1px solid #d1d5db;
-                    border-radius: 8px;
-                    margin-bottom: 10px;
-                ">
+                    <div style="
+                        padding: 15px;
+                        border: 1px solid #d1d5db;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                    ">
 
-                    <label>
-                        Website:
-                    </label>
+                        <label>
+                            Website:
+                        </label>
 
-                    <input
-                        type="text"
-                        id="editWebsite"
-                        value="${policy.targetValue}"
-                        style="
-                            padding: 8px;
-                            margin-left: 8px;
-                            width: 50%;
-                            border: 1px solid #d1d5db;
-                            border-radius: 6px;
-                        "
-                    >
+                        <input
+                            type="text"
+                            id="editWebsite"
+                            value="${policy.targetValue}"
+                            style="
+                                padding: 8px;
+                                margin-left: 8px;
+                                width: 50%;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                            "
+                        >
 
-                    <br><br>
+                        <br><br>
 
-                    <label>
-                        Action:
-                    </label>
+                        <label>
+                            Action:
+                        </label>
 
-                    <select
-                        id="editAction"
-                        style="
-                            padding: 8px;
-                            margin-left: 8px;
-                            border: 1px solid #d1d5db;
-                            border-radius: 6px;
-                        "
-                    >
-                        <option value="BLOCK"
-                            ${policy.action === "BLOCK" ? "selected" : ""}>
-                            BLOCK
-                        </option>
+                        <select
+                            id="editAction"
+                            style="
+                                padding: 8px;
+                                margin-left: 8px;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                            "
+                        >
 
-                        <option value="ALLOW"
-                            ${policy.action === "ALLOW" ? "selected" : ""}>
-                            ALLOW
-                        </option>
-                    </select>
+                            <option
+                                value="BLOCK"
+                                ${
+                    policy.action === "BLOCK"
+                        ? "selected"
+                        : ""
+                }
+                            >
+                                BLOCK
+                            </option>
 
-                    <br><br>
+                            <option
+                                value="ALLOW"
+                                ${
+                    policy.action === "ALLOW"
+                        ? "selected"
+                        : ""
+                }
+                            >
+                                ALLOW
+                            </option>
 
-                    <button onclick="saveEditedPolicy(${policyId})">
-                        Save
-                    </button>
+                        </select>
 
-                    <button
-                        onclick="loadPolicies()"
-                        style="margin-left: 5px;">
-                        Cancel
-                    </button>
+                        <br><br>
 
-                </div>
-            `;
+                        <button
+                            onclick="
+                                saveEditedPolicy(
+                                    ${policyId}
+                                )
+                            "
+                        >
+                            Save
+                        </button>
+
+                        <button
+                            onclick="loadPolicies()"
+                            style="
+                                margin-left: 5px;
+                            "
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+                `;
+
             })
             .catch(error => {
 
@@ -499,39 +665,56 @@
                     error
                 );
 
-                alert("Unable to edit policy.");
+                alert(
+                    "Unable to edit policy."
+                );
+
             });
+
     }
+
+
     function saveEditedPolicy(policyId) {
 
         const website =
-            document.getElementById("editWebsite")
+            document.getElementById(
+                "editWebsite"
+            )
                 .value
                 .trim();
 
         const action =
-            document.getElementById("editAction")
-                .value;
+            document.getElementById(
+                "editAction"
+            )
                 .value;
 
         if (website === "") {
 
-            alert("Website cannot be empty.");
+            alert(
+                "Website cannot be empty."
+            );
 
             return;
+
         }
 
         const policyData = {
 
             child: {
-                childId: 3
+                childId:
+                    Number(selectedChildId)
             },
 
-            targetType: "WEBSITE",
+            targetType:
+                "WEBSITE",
 
-            targetValue: website,
+            targetValue:
+            website,
 
-            action: action
+            action:
+            action
+
         };
 
         fetch(
@@ -540,10 +723,18 @@
                 method: "PUT",
 
                 headers: {
-                    "Content-Type": "application/json"
+
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        "Bearer " + token
+
                 },
 
-                body: JSON.stringify(policyData)
+                body:
+                    JSON.stringify(policyData)
+
             }
         )
             .then(async response => {
@@ -567,9 +758,11 @@
                         "Policy update failed with status "
                         + response.status
                     );
+
                 }
 
                 return JSON.parse(text);
+
             })
             .then(updatedPolicy => {
 
@@ -578,9 +771,12 @@
                     updatedPolicy
                 );
 
-                alert("Policy updated successfully.");
+                alert(
+                    "Policy updated successfully."
+                );
 
                 loadPolicies();
+
             })
             .catch(error => {
 
@@ -589,10 +785,18 @@
                     error
                 );
 
-                alert("Failed to update policy.");
-            });
-    }
-</script>
-</body>
+                alert(
+                    "Failed to update policy."
+                );
 
+            });
+
+    }
+
+
+    loadPolicies();
+
+</script>
+
+</body>
 </html>

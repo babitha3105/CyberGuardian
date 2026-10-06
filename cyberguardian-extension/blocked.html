@@ -1,17 +1,305 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>CyberGuardian - Access Blocked</title>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CyberGuardian - Website Blocked</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family:
+                    Arial,
+                    Helvetica,
+                    sans-serif;
+
+            background:
+                    linear-gradient(
+                            135deg,
+                            #eff6ff,
+                            #f8fafc
+                    );
+
+            color: #1f2937;
+        }
+
+        .blocked-container {
+
+            width: 90%;
+            max-width: 520px;
+
+            background: white;
+
+            padding: 40px 35px;
+
+            border-radius: 16px;
+
+            text-align: center;
+
+            box-shadow:
+                    0 10px 30px
+                    rgba(0, 0, 0, 0.12);
+        }
+
+        .shield {
+
+            width: 90px;
+            height: 90px;
+
+            margin: 0 auto 20px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            border-radius: 50%;
+
+            background-color: #fee2e2;
+
+            font-size: 45px;
+        }
+
+        h1 {
+
+            margin: 0 0 12px;
+
+            font-size: 30px;
+
+            color: #b91c1c;
+        }
+
+        .main-message {
+
+            font-size: 17px;
+
+            line-height: 1.6;
+
+            margin-bottom: 10px;
+
+            color: #374151;
+        }
+
+        .reason {
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+            line-height: 1.5;
+
+            margin-bottom: 22px;
+        }
+
+        /* Request Access section */
+
+        .request-section {
+
+            margin: 20px 0 24px;
+        }
+
+        .request-button {
+
+            display: inline-block;
+
+            padding: 12px 24px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background-color: #2563eb;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                    background-color 0.2s ease,
+                    transform 0.1s ease;
+        }
+
+        .request-button:hover {
+
+            background-color: #1d4ed8;
+
+            transform: translateY(-1px);
+        }
+
+        .request-button:disabled {
+
+            background-color: #94a3b8;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+        .request-message {
+
+            margin-top: 10px;
+
+            font-size: 14px;
+
+            color: #64748b;
+
+            line-height: 1.5;
+        }
+
+        .security-box {
+
+            padding: 16px;
+
+            margin-top: 20px;
+
+            border-radius: 10px;
+
+            background-color: #eff6ff;
+
+            border: 1px solid #bfdbfe;
+        }
+
+        .security-title {
+
+            font-weight: bold;
+
+            color: #1d4ed8;
+
+            margin-bottom: 6px;
+        }
+
+        .security-text {
+
+            margin: 0;
+
+            font-size: 14px;
+
+            color: #475569;
+
+            line-height: 1.5;
+        }
+
+        .footer {
+
+            margin-top: 28px;
+
+            padding-top: 18px;
+
+            border-top: 1px solid #e5e7eb;
+
+            font-size: 13px;
+
+            color: #9ca3af;
+        }
+
+        .brand {
+
+            font-weight: bold;
+
+            color: #2563eb;
+        }
+
+    </style>
+
 </head>
+
+
 <body>
 
-<h1>🚫 Website Blocked</h1>
+<div class="blocked-container">
 
-<p>CyberGuardian has blocked this website.</p>
 
-<p>This website is restricted by your parent or guardian.</p>
+    <div class="shield">
+
+        🛡️
+
+    </div>
+
+
+    <h1>
+
+        Website Blocked
+
+    </h1>
+
+
+    <p class="main-message">
+
+        CyberGuardian has blocked access to this website.
+
+    </p>
+
+
+    <p class="reason">
+
+        This website is restricted by your parent or guardian
+        according to the current safety settings.
+
+    </p>
+
+
+    <!-- Request Access button will be inserted here -->
+
+    <div id="requestSection"
+         class="request-section">
+    </div>
+
+
+    <div class="security-box">
+
+        <div class="security-title">
+
+            🔒 Stay Safe Online
+
+        </div>
+
+        <p class="security-text">
+
+            This protection helps keep your browsing
+            experience safer and prevents access to
+            restricted websites.
+
+        </p>
+
+    </div>
+
+
+    <div class="footer">
+
+        Protected by
+
+        <span class="brand">
+            CyberGuardian
+        </span>
+
+    </div>
+
+
+</div>
+
 
 <script src="blocked.js"></script>
 
 </body>
+
 </html>
+

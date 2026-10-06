@@ -1,6 +1,7 @@
 package com.example.cyberguardian.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity
 @Table(name = "parents")
 public class Parent{
@@ -12,6 +13,7 @@ public class Parent{
 
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passwordHash;
 
     public Long getParentId() {

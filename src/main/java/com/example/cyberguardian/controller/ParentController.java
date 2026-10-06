@@ -8,6 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.core.Authentication;
+import com.example.cyberguardian.dto.ParentResponseDTO;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/parents")
 public class ParentController {
@@ -33,4 +37,32 @@ public class ParentController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("Invalid email or password");
     }
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentParent(Authentication authentication) {
+
+        String email = authentication.getName();
+
+        Optional<Parent> parent =
+                parentService.getParentByEmail(email);
+
+        if (parent.isPresent()) {
+
+            Parent p = parent.get();
+
+            ParentResponseDTO response =
+                    new ParentResponseDTO(
+                            p.getParentId(),
+                            p.getName(),
+                            p.getEmail(),
+                            p.getCreatedAt()
+                    );
+
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Parent not found");
+    }
+
 }

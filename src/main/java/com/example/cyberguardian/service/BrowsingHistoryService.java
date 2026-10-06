@@ -7,6 +7,7 @@ import com.example.cyberguardian.repository.BrowsingHistoryRepository;
 import com.example.cyberguardian.repository.ChildRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -51,6 +52,65 @@ public class BrowsingHistoryService {
         BrowsingHistory savedHistory =
                 browsinghistoryrepository.save(browsingHistory);
 
+        if ("BLOCK".equalsIgnoreCase(browsingHistory.getActionTaken())) {
+
+            Alert alert = new Alert();
+
+            alert.setChild(child);
+            alert.setParent(child.getParent());
+
+            alert.setAlertType("BLOCKED_WEBSITE_ATTEMPT");
+
+            alert.setMessage(
+                    "Blocked website attempt: "
+                            + browsingHistory.getUrl()
+            );
+
+            alert.setRead(false);
+
+            alertService.saveAlert(alert);
+        }
+        if ("BLOCK".equalsIgnoreCase(browsingHistory.getActionTaken())) {
+
+            LocalDateTime tenMinutesAgo =
+                    LocalDateTime.now().minusMinutes(10);
+
+            long blockedAttempts =
+                    browsinghistoryrepository.countBlockedAttempts(
+                            child.getChildId(),
+                            tenMinutesAgo
+                    );
+
+            if (blockedAttempts >= 5) {
+
+                boolean suspiciousAlertExists =
+                        alertService.unreadAlertExists(
+                                child.getChildId(),
+                                "SUSPICIOUS_ACTIVITY"
+                        );
+
+                if (!suspiciousAlertExists) {
+
+                    Alert alert = new Alert();
+
+                    alert.setChild(child);
+                    alert.setParent(child.getParent());
+
+                    alert.setAlertType("SUSPICIOUS_ACTIVITY");
+
+                    alert.setMessage(
+                            child.getName()
+                                    + " repeatedly attempted to access blocked websites. "
+                                    + blockedAttempts
+                                    + " blocked attempts detected within 10 minutes."
+                    );
+
+                    alert.setRead(false);
+
+                    alertService.saveAlert(alert);
+                }
+            }
+        }
         if ("HIGH".equals(riskLevel)) {
 
             boolean unreadAlertExists =

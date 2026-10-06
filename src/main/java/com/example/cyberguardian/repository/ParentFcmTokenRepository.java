@@ -9,4 +9,5 @@ public interface ParentFcmTokenRepository
         extends JpaRepository<ParentFcmToken, Long> {
 
     Optional<ParentFcmToken> findByFcmToken(String fcmToken);
+    Optional<ParentFcmToken> findByParentParentId(Long parentId);
 }

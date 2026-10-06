@@ -1,13 +1,13 @@
 
-        package com.example.cyberguardian.service;
-
+package com.example.cyberguardian.service;
+import com.example.cyberguardian.repository.AlertRepository;
 import com.example.cyberguardian.entity.Alert;
 import com.example.cyberguardian.entity.Child;
 import com.example.cyberguardian.entity.SearchHistory;
 import com.example.cyberguardian.repository.ChildRepository;
 import com.example.cyberguardian.repository.SearchHistoryRepository;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,17 +17,20 @@ public class SearchHistoryService {
     private final SearchAnalysisService searchAnalysisService;
     private final AlertService alertService;
     private final ChildRepository childRepository;
+    private final AlertRepository alertRepository;
+
 
     public SearchHistoryService(
             SearchHistoryRepository searchhistoryrepository,
             SearchAnalysisService searchAnalysisService,
             AlertService alertService,
-            ChildRepository childRepository) {
+            ChildRepository childRepository, AlertRepository alertRepository) {
 
         this.searchhistoryrepository = searchhistoryrepository;
         this.searchAnalysisService = searchAnalysisService;
         this.alertService = alertService;
         this.childRepository = childRepository;
+        this.alertRepository = alertRepository;
     }
 
     public SearchHistory saveSearchHistory(SearchHistory searchhistory) {
@@ -76,12 +79,53 @@ public class SearchHistoryService {
 
             alert.setRead(false);
 
-            alertService.saveAlert(alert);
+            alertRepository.save(alert);
+
+            // Check for multiple high-risk searches
+            LocalDateTime tenMinutesAgo =
+                    LocalDateTime.now().minusMinutes(10);
+
+            long highRiskSearches =
+                    searchhistoryrepository.countHighRiskSearches(
+                            child.getChildId(),
+                            tenMinutesAgo
+                    );
+
+            if (highRiskSearches >= 3) {
+
+                boolean multipleSearchAlertExists =
+                        alertService.unreadAlertExists(
+                                child.getChildId(),
+                                "MULTIPLE_HIGH_RISK_SEARCHES"
+                        );
+
+                if (!multipleSearchAlertExists) {
+
+                    Alert multipleSearchAlert = new Alert();
+
+                    multipleSearchAlert.setChild(child);
+                    multipleSearchAlert.setParent(child.getParent());
+
+                    multipleSearchAlert.setAlertType(
+                            "MULTIPLE_HIGH_RISK_SEARCHES"
+                    );
+
+                    multipleSearchAlert.setMessage(
+                            child.getName()
+                                    + " made "
+                                    + highRiskSearches
+                                    + " high-risk searches within 10 minutes."
+                    );
+
+                    multipleSearchAlert.setRead(false);
+
+                    alertService.saveAlert(multipleSearchAlert);
+                }
+            }
         }
 
         return savedSearch;
     }
-
     public List<SearchHistory> getSearchHistoryByChildId(Long childId) {
         return searchhistoryrepository.findByChildChildId(childId);
     }

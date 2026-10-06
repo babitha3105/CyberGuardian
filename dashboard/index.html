@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    ```
+
     <link rel="manifest" href="manifest.json">
 
     <title>CyberGuardian - Parent Dashboard</title>
@@ -200,6 +200,15 @@
         #accessRequests button:last-of-type:hover {
             background-color: #b91c1c;
         }
+        #logoutButton {
+            float: right;
+            margin-top: -35px;
+            background-color: #dc2626;
+        }
+
+        #logoutButton:hover {
+            background-color: #b91c1c;
+        }
 
         /* Alert cards */
 
@@ -259,7 +268,6 @@
             }
         }
     </style>
-    ```
 
 </head>
 
@@ -268,6 +276,10 @@
 <header>
     <h1>CyberGuardian</h1>
     <p>Parent Dashboard</p>
+
+    <button id="logoutButton">
+        Logout
+    </button>
 </header>
 
 <div class="container">
@@ -287,11 +299,11 @@
                     id="childSelector"
                     onchange="changeSelectedChild()"
                     style="
-                    padding: 8px;
-                    margin-left: 10px;
-                    border: 1px solid #d1d5db;
-                    border-radius: 6px;
-                "
+                padding: 8px;
+                margin-left: 10px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+            "
             >
                 <option value="">Loading children...</option>
             </select>
@@ -306,9 +318,123 @@
             <strong>Status:</strong>
             <span id="childStatus">Checking...</span>
         </p>
+        <p>
+            <strong>Connection Code:</strong>
+            <span id="childConnectionCode">Loading...</span>
+        </p>
+        <button
+                id="addChildButton"
+                type="button"
+                style="
+            margin-top: 10px;
+            padding: 8px 14px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        "
+        >
+            + Add Child
+        </button>
+
+        <div
+                id="addChildForm"
+                style="
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+        "
+        >
+
+            <h3>Add Child</h3>
+
+            <label for="newChildName">
+                Child Name:
+            </label>
+
+            <input
+                    type="text"
+                    id="newChildName"
+                    placeholder="Enter child name"
+                    style="
+                padding: 8px;
+                margin-left: 10px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+            "
+            >
+
+            <br><br>
+
+            <button
+                    id="createChildButton"
+                    type="button"
+                    style="
+                padding: 8px 14px;
+                background-color: #16a34a;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            "
+            >
+                Add Child
+            </button>
+
+            <button
+                    id="cancelAddChildButton"
+                    type="button"
+                    style="
+                padding: 8px 14px;
+                margin-left: 8px;
+                background-color: #6b7280;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+            "
+            >
+                Cancel
+            </button>
+
+        </div>
+
+        <div
+                id="connectionCodeBox"
+                style="
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+        "
+        >
+            <h3>Child Added Successfully</h3>
+
+            <p>
+                <strong>Connection Code:</strong>
+            </p>
+
+            <p
+                    id="connectionCode"
+                    style="
+                font-size: 24px;
+                font-weight: bold;
+                letter-spacing: 3px;
+            "
+            ></p>
+
+            <p>
+                Enter this code in the
+                CyberGuardian Chrome Extension
+                to connect this child.
+            </p>
+        </div>
 
     </div>
-
     <!-- Overview -->
 
     <h2>Overview — All-Time</h2>
@@ -383,7 +509,7 @@
     <div class="child-info">
 
         <p>
-            <strong>Category:</strong>
+            <strong>Categories:</strong>
             <span id="geminiCategory">Loading...</span>
         </p>
 
@@ -499,15 +625,15 @@
 </div>
 <script type="module">
 
-    import { initializeApp }
+     import { initializeApp }
         from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
     import {
         getMessaging,
-        getToken
+        getToken,
+        onMessage
     }
         from "https://www.gstatic.com/firebasejs/12.3.0/firebase-messaging.js";
-
 
     const firebaseConfig = {
 
@@ -539,8 +665,26 @@
 
     const messaging =
         getMessaging(app);
+     onMessage(messaging, (payload) => {
 
+         console.log(
+             "Foreground notification received:",
+             payload
+         );
 
+         const title =
+             payload.notification?.title ||
+             "CyberGuardian Alert";
+
+         const body =
+             payload.notification?.body ||
+             "A new security alert was received.";
+
+         new Notification(title, {
+             body: body,
+             icon: "./icons/icon-192.png"
+         });
+     });
     const notificationButton =
         document.getElementById(
             "enableNotifications"
@@ -603,8 +747,14 @@
                     "FCM TOKEN:",
                     token
                 );
+                if (!parentId) {
+                    alert("Parent information is not loaded yet.");
+                    return;
+                }
                 const response = await fetch(
-                    "http://localhost:8080/api/fcm/token?parentId=1&fcmToken="
+                    "http://localhost:8080/api/fcm/token?parentId="
+                    + parentId
+                    + "&fcmToken="
                     + encodeURIComponent(token),
                     {
                         method: "POST"
@@ -659,15 +809,62 @@
 </script>
 <script>
 
-    const parentId = 1;
+    let parentId = null;
 
     let selectedChildId =
         localStorage.getItem("selectedChildId") || "";
-
     /*
      * Load all dashboard data after the children
      * have been loaded and selected.
+     *
      */
+    async function loadCurrentParent() {
+        console.log("loadCurrentParent() STARTED");
+        const token = localStorage.getItem("jwtToken");
+
+        if (!token) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:8080/api/parents/me",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                localStorage.removeItem("jwtToken");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const parent = await response.json();
+
+            parentId = parent.parentId;
+
+            console.log("Logged-in parent:", parent);
+            console.log("Parent ID:", parentId);
+
+            loadChildren();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load logged-in parent:",
+                error
+            );
+
+            localStorage.removeItem("jwtToken");
+            window.location.href = "login.html";
+        }
+    }
     function loadDashboardData() {
 
         if (!selectedChildId) {
@@ -688,10 +885,26 @@
        CHILDREN
     ---------------------------------------- */
 
+    function logout() {
+
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("selectedChildId");
+
+        window.location.href = "login.html";
+    }
+
     function loadChildren() {
 
+        const token = localStorage.getItem("jwtToken");
+
         fetch(
-            `http://localhost:8080/api/children/parent/${parentId}`
+            `http://localhost:8080/api/children/parent/${parentId}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            }
         )
             .then(async response => {
 
@@ -799,11 +1012,39 @@
                         .textContent =
                         selectedChild.name;
 
-                    document.getElementById("childStatus")
+                    const childStatus =
+                        document.getElementById("childStatus");
+
+                    if (!selectedChild.lastSeen) {
+
+                        childStatus.textContent =
+                            "⚪ Not Connected";
+
+                    } else {
+
+                        const lastSeen =
+                            new Date(selectedChild.lastSeen);
+
+                        const now =
+                            new Date();
+
+                        const differenceInMinutes =
+                            (now - lastSeen) / (1000 * 60);
+
+                        if (differenceInMinutes <= 5) {
+
+                            childStatus.textContent =
+                                "🟢 Connected";
+
+                        } else {
+
+                            childStatus.textContent =
+                                "🔴 Disconnected";
+                        }
+                    }
+                    document.getElementById("childConnectionCode")
                         .textContent =
-                        selectedChild.extensionStatus === "CONNECTED"
-                            ? "🟢 Connected"
-                            : "🔴 Disconnected";
+                        selectedChild.connectionCode || "Not available";
                 }
 
                 /*
@@ -811,9 +1052,7 @@
                  * load all child-specific dashboard data.
                  */
 
-                loadDashboardData();
-
-            })
+                loadDashboardData();            })
             .catch(error => {
 
                 console.error(
@@ -834,7 +1073,121 @@
                     "Unknown";
             });
     }
+    document.getElementById("addChildButton")
+        .addEventListener("click", function () {
 
+            document.getElementById("addChildForm")
+                .style.display = "block";
+
+        });
+
+    document.getElementById("cancelAddChildButton")
+        .addEventListener("click", function () {
+
+            document.getElementById("addChildForm")
+                .style.display = "none";
+
+        });
+    document.getElementById("createChildButton")
+        .addEventListener("click", async function () {
+
+            const childName =
+                document.getElementById("newChildName")
+                    .value
+                    .trim();
+
+            if (!childName) {
+
+                alert("Please enter the child's name.");
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:8080/api/children",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name: childName,
+                            parent: {
+                                parentId: parentId
+                            }
+                        })
+                    }
+                );
+
+                const text = await response.text();
+
+                console.log(
+                    "CREATE CHILD STATUS:",
+                    response.status
+                );
+
+                console.log(
+                    "CREATE CHILD RESPONSE:",
+                    text
+                );
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Failed to create child"
+                    );
+                }
+
+                const child = JSON.parse(text);
+
+                console.log(
+                    "Created child:",
+                    child
+                );
+
+                /*
+                 * Display the generated connection code.
+                 */
+
+                document.getElementById("connectionCode")
+                    .textContent =
+                    child.connectionCode;
+
+                document.getElementById("connectionCodeBox")
+                    .style.display = "block";
+
+                /*
+                 * Clear the input and hide the form.
+                 */
+
+                document.getElementById("newChildName")
+                    .value = "";
+
+                document.getElementById("addChildForm")
+                    .style.display = "none";
+
+                /*
+                 * Reload the child selector.
+                 */
+
+                loadChildren();
+
+            } catch (error) {
+
+                console.error(
+                    "Creating child failed:",
+                    error
+                );
+
+                alert(
+                    "Unable to create child. Please try again."
+                );
+            }
+
+        });
     function changeSelectedChild() {
 
         const selector =
@@ -983,8 +1336,12 @@
          * to the parent, not only the selected child.
          */
 
+        /*
+ * Selected-child alert count
+ */
+
         fetch(
-            `http://localhost:8080/api/alerts/parent/${parentId}`
+            `http://localhost:8080/api/alerts/child/${selectedChildId}`
         )
             .then(async response => {
 
@@ -1013,6 +1370,11 @@
             })
             .then(alerts => {
 
+                console.log(
+                    "SELECTED CHILD ALERTS:",
+                    alerts
+                );
+
                 document.getElementById("alertCount")
                     .textContent =
                     alerts.length;
@@ -1029,7 +1391,6 @@
                     .textContent =
                     "0";
             });
-
     }
 
 
@@ -1118,12 +1479,16 @@
 
                 container.innerHTML = "";
 
-                const recentHistory =
+                const allHistory =
                     history
-                        .slice(-10)
-                        .reverse();
+                        .slice()
+                        .sort(
+                            (a, b) =>
+                                new Date(b.visitedAt) -
+                                new Date(a.visitedAt)
+                        );
 
-                if (recentHistory.length === 0) {
+                if (allHistory.length === 0) {
 
                     container.textContent =
                         "No browsing activity.";
@@ -1131,21 +1496,74 @@
                     return;
                 }
 
-                recentHistory.forEach(item => {
+                function renderHistory(showAll) {
 
-                    const entry =
-                        document.createElement("div");
+                    container.innerHTML = "";
 
-                    entry.innerHTML = `
-                        <strong>${getReadableUrl(item.url)}</strong><br>
-                        Category: ${item.category}<br>
-                        Risk: ${item.riskLevel}<br>
-                        Action: ${item.actionTaken}
-                    `;
+                    const visibleHistory =
+                        showAll
+                            ? allHistory
+                            : allHistory.slice(0, 5);
 
-                    container.appendChild(entry);
+                    visibleHistory.forEach(item => {
 
-                });
+                        const entry =
+                            document.createElement("div");
+
+                        const strong = document.createElement("strong");
+                        strong.textContent = getReadableUrl(item.url);
+
+                        entry.appendChild(strong);
+                        entry.appendChild(document.createElement("br"));
+
+                        entry.appendChild(
+                            document.createTextNode(
+                                "Category: " + item.category
+                            )
+                        );
+
+                        entry.appendChild(document.createElement("br"));
+
+                        entry.appendChild(
+                            document.createTextNode(
+                                "Risk: " + item.riskLevel
+                            )
+                        );
+
+                        entry.appendChild(document.createElement("br"));
+
+                        entry.appendChild(
+                            document.createTextNode(
+                                "Action: " + item.actionTaken
+                            )
+                        );
+
+                        container.appendChild(entry);
+
+                    });
+
+                    if (allHistory.length > 5) {
+
+                        const moreButton =
+                            document.createElement("button");
+
+                        moreButton.textContent =
+                            showAll
+                                ? "Show Less"
+                                : "See More";
+
+                        moreButton.addEventListener(
+                            "click",
+                            () => {
+                                renderHistory(!showAll);
+                            }
+                        );
+
+                        container.appendChild(moreButton);
+                    }
+                }
+
+                renderHistory(false);
 
             })
             .catch(error => {
@@ -1163,162 +1581,165 @@
             });
 
     }
-
-
     /* ----------------------------------------
        RECENT SEARCHES
     ---------------------------------------- */
-
-    function loadRecentSearches() {
-
-        fetch(
-            `http://localhost:8080/api/search-history/child/${selectedChildId}`
-        )
-            .then(async response => {
-
-                console.log(
-                    "RECENT SEARCHES STATUS:",
-                    response.status
-                );
-
-                const text =
-                    await response.text();
-
-                console.log(
-                    "RECENT SEARCHES RESPONSE:",
-                    text
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Search history request failed with status "
-                        + response.status
-                    );
+    function loadRecentSearches()
+    {
+        fetch( `http://localhost:8080/api/search-history/child/${selectedChildId}` )
+            .then(async response => { console.log( "RECENT SEARCHES STATUS:", response.status );
+                const text = await response.text();
+                console.log( "RECENT SEARCHES RESPONSE:", text );
+                if (!response.ok) { throw new Error( "Search history request failed with status " + response.status );
                 }
-
                 return JSON.parse(text);
-
-            })
-            .then(searches => {
-
-                const container =
-                    document.getElementById(
-                        "recentSearches"
-                    );
-
+            }) .then(searches => { const container = document.getElementById( "recentSearches" );
                 container.innerHTML = "";
+            const allSearches =
+                searches
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            new Date(b.searchedAt) -
+                            new Date(a.searchedAt)
+                    );
+            if (allSearches.length === 0) { container.textContent = "No recent searches.";
+                    return; }
+                function renderSearches(showAll)
+                { container.innerHTML = "";
+                    const visibleSearches = showAll ? allSearches : allSearches.slice(0, 5);
+                    visibleSearches.forEach(item => { const entry = document.createElement("div");
+                        const strong = document.createElement("strong");
+                        strong.textContent = item.searchQuery;
 
-                const recentSearches =
-                    searches
-                        .slice(-10)
-                        .reverse();
+                        entry.appendChild(strong);
+                        entry.appendChild(document.createElement("br"));
 
-                if (recentSearches.length === 0) {
+                        entry.appendChild(
+                            document.createTextNode(
+                                "Category: " + item.category
+                            )
+                        );
 
-                    container.textContent =
-                        "No recent searches.";
+                        entry.appendChild(document.createElement("br"));
 
-                    return;
-                }
-
-                recentSearches.forEach(item => {
-
-                    const entry =
-                        document.createElement("div");
-
-                    entry.innerHTML = `
-                        <strong>${item.searchQuery}</strong><br>
-                        Category: ${item.category}<br>
-                        Risk: ${item.riskLevel}
-                    `;
-
-                    container.appendChild(entry);
-
-                });
-
-            })
-            .catch(error => {
-
-                console.error(
-                    "Recent searches failed:",
-                    error
-                );
-
-                document.getElementById(
-                    "recentSearches"
-                ).textContent =
-                    "Unable to load recent searches.";
-
+                        entry.appendChild(
+                            document.createTextNode(
+                                "Risk: " + item.riskLevel
+                            )
+                        );
+                        container.appendChild(entry); });
+                    if (allSearches.length > 5) { const moreButton = document.createElement("button");
+                        moreButton.textContent = showAll ? "Show Less" : "See More"; moreButton.addEventListener( "click", () => { renderSearches(!showAll); } );
+                        container.appendChild(moreButton);
+                    } } renderSearches(false);
+            }) .catch(error => { console.error( "Recent searches failed:", error );
+     document.getElementById( "recentSearches" ).textContent = "Unable to load recent searches.";
             });
-
     }
-
-
     /* ----------------------------------------
        ACCESS REQUESTS
     ---------------------------------------- */
 
-    function loadAccessRequests() {
+function loadAccessRequests() {
 
-        fetch(
-            `http://localhost:8080/api/access-requests/child/${selectedChildId}`
-        )
-            .then(async response => {
+    const token = localStorage.getItem("jwtToken");
 
-                console.log(
-                    "ACCESS REQUESTS STATUS:",
-                    response.status
+    fetch(
+        `http://localhost:8080/api/access-requests/child/${selectedChildId}`,
+        {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        }
+    )
+    .then(async response => {
+
+        console.log(
+            "ACCESS REQUESTS STATUS:",
+            response.status
+        );
+
+        const text =
+            await response.text();
+
+        console.log(
+            "ACCESS REQUESTS RESPONSE:",
+            text
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "Access requests failed with status "
+                + response.status
+            );
+        }
+
+        return JSON.parse(text);
+
+    })
+        .then(requests => {
+
+            const container =
+                document.getElementById(
+                    "accessRequests"
                 );
 
-                const text =
-                    await response.text();
+            container.innerHTML = "";
 
-                console.log(
-                    "ACCESS REQUESTS RESPONSE:",
-                    text
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Access requests failed with status "
-                        + response.status
+            const allRequests =
+                requests
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            new Date(b.requestedAt) -
+                            new Date(a.requestedAt)
                     );
-                }
 
-                return JSON.parse(text);
+            if (allRequests.length === 0) {
 
-            })
-            .then(requests => {
+                container.textContent =
+                    "No access requests.";
 
-                const container =
-                    document.getElementById(
-                        "accessRequests"
-                    );
+                return;
+            }
+
+            function renderRequests(showAll) {
 
                 container.innerHTML = "";
 
-                if (requests.length === 0) {
+                const visibleRequests =
+                    showAll
+                        ? allRequests
+                        : allRequests.slice(0, 5);
 
-                    container.textContent =
-                        "No access requests.";
-
-                    return;
-                }
-
-                requests.forEach(request => {
+                visibleRequests.forEach(request => {
 
                     const entry =
                         document.createElement("div");
 
-                    entry.innerHTML = `
-                        <strong>${request.url}</strong><br>
-                        Status: ${request.status}<br>
-                        Requested At: ${request.requestedAt}
-                    `;
+                    const strong = document.createElement("strong");
+                    strong.textContent = request.url;
 
-                    if (
-                        request.status === "PENDING"
-                    ) {
+                    entry.appendChild(strong);
+                    entry.appendChild(document.createElement("br"));
+
+                    entry.appendChild(
+                        document.createTextNode(
+                            "Status: " + request.status
+                        )
+                    );
+
+                    entry.appendChild(document.createElement("br"));
+
+                    entry.appendChild(
+                        document.createTextNode(
+                            "Requested At: " + request.requestedAt
+                        )
+                    );
+
+                    if (request.status === "PENDING") {
 
                         const approveButton =
                             document.createElement("button");
@@ -1373,24 +1794,86 @@
 
                     }
 
+                    else if (request.status === "APPROVED") {
+
+                        const statusText =
+                            document.createElement("p");
+
+                        statusText.textContent =
+                            "✓ Access Approved";
+
+                        statusText.style.fontWeight =
+                            "bold";
+
+                        entry.appendChild(
+                            statusText
+                        );
+
+                    }
+
+                    else if (request.status === "DENIED") {
+
+                        const statusText =
+                            document.createElement("p");
+
+                        statusText.textContent =
+                            "✕ Access Denied";
+
+                        statusText.style.fontWeight =
+                            "bold";
+
+                        entry.appendChild(
+                            statusText
+                        );
+
+                    }
+
                     container.appendChild(entry);
 
                 });
 
-            })
-            .catch(error => {
+                if (allRequests.length > 5) {
 
-                console.error(
-                    "Access requests failed:",
-                    error
-                );
+                    const moreButton =
+                        document.createElement("button");
 
-                document.getElementById(
-                    "accessRequests"
-                ).textContent =
-                    "Unable to load access requests.";
+                    moreButton.textContent =
+                        showAll
+                            ? "Show Less"
+                            : "See More";
 
-            });
+                    moreButton.addEventListener(
+                        "click",
+                        () => {
+
+                            renderRequests(!showAll);
+
+                        }
+                    );
+
+                    container.appendChild(
+                        moreButton
+                    );
+                }
+
+            }
+
+            renderRequests(false);
+
+        })
+        .catch(error => {
+
+            console.error(
+                "Access requests failed:",
+                error
+            );
+
+            document.getElementById(
+                "accessRequests"
+            ).textContent =
+                "Unable to load access requests.";
+
+        });
 
     }
 
@@ -1573,228 +2056,262 @@
        RECENT ALERTS
     ---------------------------------------- */
 
-    function loadRecentAlerts() {
 
-        fetch(
-            `http://localhost:8080/api/alerts/parent/${parentId}`
-        )
-            .then(async response => {
+function loadRecentAlerts() {
 
-                if (!response.ok) {
+    fetch(
+        `http://localhost:8080/api/alerts/child/${selectedChildId}`
+    ).then(async response => {
 
-                    throw new Error(
-                        "Failed to load alerts"
-                    );
+        if (!response.ok) {
 
-                }
+            throw new Error(
+                "Failed to load alerts"
+            );
 
-                return response.json();
+        }
 
-            })
-            .then(alerts => {
+        return response.json();
 
-                /*
-                 * The parent-level alert count includes
-                 * alerts from all children.
-                 *
-                 * Recent Alerts displays only alerts
-                 * belonging to the selected child.
-                 */
+    })
+        .then(alerts => {
 
-                const childAlerts =
-                    alerts.filter(
-                        alert =>
-                            String(alert.childId) ===
-                            String(selectedChildId)
-                    );
+            /*
+             * The parent-level alert count includes
+             * alerts from all children.
+             *
+             * Recent Alerts displays only alerts
+             * belonging to the selected child.
+             */
 
-                const container =
-                    document.getElementById(
-                        "recentAlerts"
-                    );
+            const childAlerts = alerts;
 
-                if (childAlerts.length === 0) {
+            console.log(
+                "SELECTED CHILD ALERTS:",
+                childAlerts
+            );
+            const container =
+                document.getElementById(
+                    "recentAlerts"
+                );
 
-                    container.innerHTML =
-                        "<p>No alerts for this child.</p>";
+            if (childAlerts.length === 0) {
 
-                    return;
-                }
+                container.innerHTML =
+                    "<p>No alerts for this child.</p>";
+
+                return;
+            }
+
+            const allAlerts =
+                childAlerts
+                    .slice()
+                    .reverse();
+
+            function renderAlerts(showAll) {
 
                 container.innerHTML = "";
 
-                childAlerts
-                    .slice()
-                    .reverse()
-                    .slice(0, 5)
-                    .forEach(alert => {
+                const visibleAlerts =
+                    showAll
+                        ? allAlerts
+                        : allAlerts.slice(0, 5);
 
-                        const alertDiv =
-                            document.createElement("div");
+                visibleAlerts.forEach(alert => {
 
-                        let alertTitle =
-                            alert.alertType;
+                    const alertDiv =
+                        document.createElement("div");
 
-                        if (
-                            alert.alertType ===
-                            "HIGH_RISK_SEARCH"
-                        ) {
+                    let alertTitle =
+                        alert.alertType;
 
-                            alertTitle =
-                                "⚠️ High-Risk Search";
+                    if (
+                        alert.alertType ===
+                        "HIGH_RISK_SEARCH"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "HIGH_RISK_WEBSITE"
-                        ) {
+                        alertTitle =
+                            "⚠️ High-Risk Search";
 
-                            alertTitle =
-                                "⚠️ High-Risk Website";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "HIGH_RISK_WEBSITE"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "TAMPER_DETECTED"
-                        ) {
+                        alertTitle =
+                            "⚠️ High-Risk Website";
 
-                            alertTitle =
-                                "🛡️ Extension Tampering Detected";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "TAMPER_DETECTED"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "ACCESS_REQUEST"
-                        ) {
+                        alertTitle =
+                            "🛡️ Extension Tampering Detected";
 
-                            alertTitle =
-                                "🔔 Access Request";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "ACCESS_REQUEST"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "PHISHING_PATTERN"
-                        ) {
+                        alertTitle =
+                            "🔔 Access Request";
 
-                            alertTitle =
-                                "⚠️ Suspicious Search Pattern";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "PHISHING_PATTERN"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "RISK_DETECTED" ||
-                            alert.alertType ===
-                            "RISK"
-                        ) {
+                        alertTitle =
+                            "⚠️ Suspicious Search Pattern";
 
-                            alertTitle =
-                                "⚠️ Security Risk Detected";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "RISK_DETECTED" ||
+                        alert.alertType ===
+                        "RISK"
+                    ) {
 
-                        }
-                        else if (
-                            alert.alertType ===
-                            "HIGH_RISK_SEARCH_PATTERN"
-                        ) {
+                        alertTitle =
+                            "⚠️ Security Risk Detected";
 
-                            alertTitle =
-                                "⚠️ High-Risk Search Pattern";
+                    }
+                    else if (
+                        alert.alertType ===
+                        "HIGH_RISK_SEARCH_PATTERN"
+                    ) {
 
-                        }
+                        alertTitle =
+                            "⚠️ High-Risk Search Pattern";
 
-                        const title =
+                    }
+
+                    const title =
+                        document.createElement("p");
+
+                    const strong =
+                        document.createElement("strong");
+
+                    strong.textContent =
+                        alertTitle;
+
+                    title.appendChild(strong);
+
+                    alertDiv.appendChild(title);
+
+
+                    const message =
+                        document.createElement("p");
+
+                    message.textContent =
+                        alert.message;
+
+                    alertDiv.appendChild(message);
+
+
+                    if (alert.read) {
+
+                        const readText =
                             document.createElement("p");
 
-                        const strong =
+                        const readStrong =
                             document.createElement("strong");
 
-                        strong.textContent =
-                            alertTitle;
+                        readStrong.textContent =
+                            "Read";
 
-                        title.appendChild(strong);
-
-                        alertDiv.appendChild(title);
-
-
-                        const message =
-                            document.createElement("p");
-
-                        message.textContent =
-                            alert.message;
-
-                        alertDiv.appendChild(message);
-
-
-                        if (alert.read) {
-
-                            const readText =
-                                document.createElement("p");
-
-                            const readStrong =
-                                document.createElement("strong");
-
-                            readStrong.textContent =
-                                "Read";
-
-                            readText.appendChild(
-                                readStrong
-                            );
-
-                            alertDiv.appendChild(
-                                readText
-                            );
-
-                        }
-                        else {
-
-                            const readButton =
-                                document.createElement(
-                                    "button"
-                                );
-
-                            readButton.textContent =
-                                "Mark as Read";
-
-                            readButton.addEventListener(
-                                "click",
-                                () => {
-
-                                    markAlertAsRead(
-                                        alert.alertId
-                                    );
-
-                                }
-                            );
-
-                            alertDiv.appendChild(
-                                readButton
-                            );
-
-                        }
-
-                        container.appendChild(
-                            alertDiv
+                        readText.appendChild(
+                            readStrong
                         );
 
-                    });
+                        alertDiv.appendChild(
+                            readText
+                        );
 
-            })
-            .catch(error => {
+                    }
+                    else {
 
-                console.error(
-                    "Error loading alerts:",
-                    error
-                );
+                        const readButton =
+                            document.createElement(
+                                "button"
+                            );
 
-                document.getElementById(
-                    "recentAlerts"
-                ).innerHTML =
-                    "<p>Failed to load alerts.</p>";
+                        readButton.textContent =
+                            "Mark as Read";
 
-            });
+                        readButton.addEventListener(
+                            "click",
+                            () => {
+
+                                markAlertAsRead(
+                                    alert.alertId
+                                );
+
+                            }
+                        );
+
+                        alertDiv.appendChild(
+                            readButton
+                        );
+
+                    }
+
+                    container.appendChild(
+                        alertDiv
+                    );
+
+                });
+
+                if (allAlerts.length > 5) {
+
+                    const moreButton =
+                        document.createElement("button");
+
+                    moreButton.textContent =
+                        showAll
+                            ? "Show Less"
+                            : "See More";
+
+                    moreButton.addEventListener(
+                        "click",
+                        () => {
+
+                            renderAlerts(!showAll);
+
+                        }
+                    );
+
+                    container.appendChild(
+                        moreButton
+                    );
+
+                }
+
+            }
+
+            renderAlerts(false);
+
+        })
+        .catch(error => {
+
+            console.error(
+                "Error loading alerts:",
+                error
+            );
+
+            document.getElementById(
+                "recentAlerts"
+            ).innerHTML =
+                "<p>Failed to load alerts.</p>";
+
+        });
 
     }
-
-
     function markAlertAsRead(alertId) {
 
         fetch(
@@ -1898,7 +2415,9 @@
             .then(analysis => {
 
                 category.textContent =
-                    analysis.category || "N/A";
+                    analysis.categories && analysis.categories.length > 0
+                        ? analysis.categories.join(", ")
+                        : "N/A";
 
                 intent.textContent =
                     analysis.intent || "N/A";
@@ -1980,9 +2499,9 @@
     /* ----------------------------------------
        START DASHBOARD
     ---------------------------------------- */
-
-    loadChildren();
-
+    document.getElementById("logoutButton")
+        .addEventListener("click", logout);
+    loadCurrentParent();
 </script>
 
 </body>

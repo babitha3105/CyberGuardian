@@ -80,4 +80,20 @@ public class AccessRequestService {
 
         return accessRequestRepository.save(request);
     }
+    public boolean childBelongsToParent(
+            Long childId,
+            Long parentId) {
+
+        Optional<Child> child =
+                childRepository.findById(childId);
+
+        if (child.isEmpty()) {
+            return false;
+        }
+
+        return child.get()
+                .getParent()
+                .getParentId()
+                .equals(parentId);
+    }
 }

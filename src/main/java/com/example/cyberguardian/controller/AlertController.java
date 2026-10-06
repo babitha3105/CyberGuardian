@@ -39,4 +39,23 @@ public class AlertController {
     public Alert markAlertAsRead(@PathVariable Long alertId) {
         return alertservice.markAlertAsRead(alertId);
     }
+    @GetMapping("/child/{childId}")
+    public List<AlertResponseDTO> getAlertsByChildId(
+            @PathVariable Long childId) {
+
+        List<Alert> alerts =
+                alertservice.getAlertsByChildId(childId);
+
+        return alerts.stream()
+                .map(alert -> new AlertResponseDTO(
+                        alert.getAlertId(),
+                        alert.getAlertType(),
+                        alert.getMessage(),
+                        alert.isRead(),
+                        alert.getCreatedAt(),
+                        alert.getChild().getChildId(),
+                        alert.getChild().getName()
+                ))
+                .toList();
+    }
 }
