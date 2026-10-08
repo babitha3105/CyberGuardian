@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CyberGuardian",
   "version": "1.0",
-  "description": "AI-Assisted Web Threat Detection and Parent Alert System",
+  "description": "Web Threat Detection and Intelligent Parent Alert System ",
 
   "permissions": [
     "storage",
